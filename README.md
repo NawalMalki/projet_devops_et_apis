@@ -1,27 +1,12 @@
-# ProjetDevopsEtApis
+# Projet devops et apis
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+<img width="1293" height="643" alt="image" src="https://github.com/user-attachments/assets/d4e5961a-d92e-4940-8295-7793bb55c803" />
+<img width="1293" height="643" alt="image" src="https://github.com/user-attachments/assets/37adf056-9ad6-435b-998c-3299fa98da06" />
+<img width="1291" height="640" alt="image" src="https://github.com/user-attachments/assets/6e8af625-4441-4a93-ad18-a488eb08772f" />
+<img width="1285" height="640" alt="image" src="https://github.com/user-attachments/assets/681bfcc3-b684-4235-a153-e8f65bcdb092" />
 
-## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
