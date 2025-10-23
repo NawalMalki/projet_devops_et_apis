@@ -1,0 +1,71 @@
+<div class="sign-in-container playfair-display-fonti">
+  <div class="sign-in-card">
+    <div class="logo-section">
+      <h1 class="logo">BookBuddies</h1>
+      <p class="tagline">Votre compagnon de lecture numérique</p>
+    </div>
+
+  
+
+    <form [formGroup]="signInForm" (ngSubmit)="onSubmit()" class="sign-in-form">
+      <div class="form-group">
+        <label for="email">Adresse mail</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          placeholder="Entrez votre adresse email"
+          class="form-input"
+        />
+        <span class="error-message" *ngIf="signInForm.get('email')?.invalid && signInForm.get('email')?.touched">
+          Please enter a valid email
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="password-input-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password"
+            placeholder="Entrez votre mot de passe"
+            class="form-input"
+          />
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <span class="error-message" *ngIf="signInForm.get('password')?.invalid && signInForm.get('password')?.touched">
+          Password must be at least 6 characters
+        </span>
+      </div>
+
+      <div class="form-actions">
+        <a href="#" class="forgot-password">Mot de passe oublié?</a>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="signInForm.invalid">
+        Se connecter
+      </button>
+
+      <div class="divider">
+        <span>ou</span>
+      </div>
+
+      <button type="button" class="btn-secondary">
+        <span class="google-icon">G</span>
+        Continuer avec Google
+      </button>
+    </form>
+
+    <p class="sign-up-link">
+      Vous n'avez pas de comtpe? 
+      <a (click)="navigateToSignUp()">S'inscrire</a>
+    </p>
+  </div>
+</div>

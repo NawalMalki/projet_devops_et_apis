@@ -1,0 +1,44 @@
+<div class="home-container">
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
+
+  <div class="main-content" [class.sidebar-closed]="!sidebarOpen">
+    <app-header 
+      class="fixed-header"
+      (toggleSidebar)="toggleSidebar()"
+    ></app-header>
+    
+    <main class="content">
+      <section class="hero-section">
+        <h1 class="hero-title">Content de te revoir, lecteur !</h1>
+        <p class="hero-subtitle">Poursuis ton voyage de lecture</p>
+      </section>
+
+      <section class="content-in">
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Continue ta lecture</h2>
+            <a href="#" class="section-link">Voir tout</a>
+          </div>
+          <div class="books-grid">
+            <div class="book-card" *ngFor="let book of books">
+              <div class="book-cover-wrapper">
+                <img [src]="book.cover" [alt]="book.title" class="book-cover" />
+                <div class="book-overlay">
+                  <button class="overlay-button">Lire maintenant</button>
+                </div>
+              </div>
+              <div class="book-info">
+                <h3 class="book-title">{{ book.title }}</h3>
+                <p class="book-author">{{ book.author }}</p>
+                <div class="book-meta">
+                  <span class="book-rating">⭐ {{ book.rating }}</span>
+                  <span class="book-genre">{{ book.genre }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</div>

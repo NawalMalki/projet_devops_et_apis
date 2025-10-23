@@ -1,0 +1,102 @@
+<div class="sign-up-container">
+  <div class="sign-up-card">
+    <div class="logo-section">
+      <h1 class="logo">BookBuddies</h1>
+      <p class="tagline">Commence ton voyage de lecture dès aujourd’hui.</p>
+    </div>
+
+    <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="sign-up-form">
+      <div class="form-group">
+        <label for="fullName">Nom Complet</label>
+        <input 
+          type="text" 
+          id="fullName" 
+          formControlName="fullName"
+          placeholder="Saisissez votre nom complet"
+          class="form-input"
+        />
+        <span class="error-message" *ngIf="signUpForm.get('fullName')?.invalid && signUpForm.get('fullName')?.touched">
+          Le nom doit contenir au moins 3 caractères
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Adresse email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          placeholder="Entrez votre adresse email"
+          class="form-input"
+        />
+        <span class="error-message" *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched">
+          Veuillez saisir une adresse email valide
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="password-input-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password"
+            placeholder="Créer un mot de passe"
+            class="form-input"
+          />
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <span class="error-message" *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched">
+          Le mot de passe doit contenir au moins 6 caractères
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmation de mot de passe</label>
+        <div class="password-input-wrapper">
+          <input 
+            [type]="showConfirmPassword ? 'text' : 'password'" 
+            id="confirmPassword" 
+            formControlName="confirmPassword"
+            placeholder="Confirmer le mot de passe"
+            class="form-input"
+          />
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="toggleConfirmPasswordVisibility()"
+          >
+            {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <span class="error-message" *ngIf="signUpForm.get('confirmPassword')?.hasError('passwordMismatch') && signUpForm.get('confirmPassword')?.touched">
+          Les mots de passe ne correspondent pas
+        </span>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="signUpForm.invalid">
+        Créer un compte
+      </button>
+
+      <div class="divider">
+        <span>ou</span>
+      </div>
+
+      <button type="button" class="btn-secondary">
+        <span class="google-icon">G</span>
+        Continuer avec Google 
+      </button>
+    </form>
+
+    <p class="sign-in-link">
+      Vous avez déjà un compte? 
+      <a (click)="navigateToSignIn()">Se connecter</a>
+    </p>
+  </div>
+</div>
