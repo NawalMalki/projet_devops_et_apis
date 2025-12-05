@@ -1,6 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -10,6 +11,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimations(),
+    provideHttpClient(), 
     provideFirebaseApp(() => initializeApp({
       projectId: "projet-devops-et-apis-f94a9",
       appId: "1:314168005118:web:a4aece6564590f9075b0af",
