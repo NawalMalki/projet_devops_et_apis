@@ -11,25 +11,33 @@
             [class.nav-item-active]="item.active"
             (click)="onMenuItemClick(item)"
           >
-            <span class="nav-icon">{{ item.icon }}</span>
+            
             <span class="nav-label">{{ item.label }}</span>
           </a>
         </li>
       </ul>
     </div>
 
+    <!-- Dynamic categories from Google Books API -->
     <div class="nav-section">
       <h3 class="nav-section-title">Catégories</h3>
-      <ul class="nav-list">
+      
+      <div *ngIf="isLoadingGenres" class="loading-genres">
+        <p>Chargement...</p>
+      </div>
+
+      <ul class="nav-list" *ngIf="!isLoadingGenres">
         <li *ngFor="let category of categories">
-          <a href="#" class="nav-item">
+          <a 
+            href="#" 
+            class="nav-item"
+            (click)="onGenreClick(category, $event)"
+          >
             <span class="nav-label">{{ category.name }}</span>
             <span class="nav-count">{{ category.count }}</span>
           </a>
         </li>
       </ul>
     </div>
-
-   
   </nav>
 </aside>

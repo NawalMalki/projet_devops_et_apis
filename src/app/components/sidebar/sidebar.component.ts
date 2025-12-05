@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common"
-import { Component, Input, Output, EventEmitter } from "@angular/core"
-import { RouterModule } from "@angular/router"
+import { Component, Input, Output, EventEmitter, type OnInit } from "@angular/core"
+import {  Router, RouterModule } from "@angular/router"
+import { BooksService, Genre } from "../../services/books.service"
 
 @Component({
   selector: "app-sidebar",
@@ -9,29 +10,52 @@ import { RouterModule } from "@angular/router"
   imports: [CommonModule, RouterModule],
   styleUrls: ["./sidebar.component.css"],
 })
-export class SidebarComponent {
-@Input() isOpen: boolean = false;
-@Output() isOpenChange = new EventEmitter<boolean>(); 
-  
+export class SidebarComponent implements OnInit {
+  @Input() isOpen = false
+  @Output() isOpenChange = new EventEmitter<boolean>()
 
   menuItems = [
-    { icon: "🏠", label: "Accueil", route: "/home", active: true },
-    { icon: "📚", label: "Ma bibliothèque", route: "/library", active: false },
-    { icon: "📖", label: "En cours de lecture", route: "/reading", active: false },
-    { icon: "✅", label: "Terminés", route: "/finished", active: false },
-    { icon: "⭐", label: "Favoris", route: "/favorites", active: false },
+    { label: "Accueil", route: "/home", active: true },
+    { label: "Ma bibliothèque", route: "/library", active: false },
+    {  label: "En cours de lecture", route: "/reading", active: false },
+    {  label: "Terminés", route: "/finished", active: false },
+    {  label: "Favoris", route: "/favorites", active: false },
   ]
 
-  categories = [
-    { name: "Fiction", count: 124 },
-    { name: "Non-Fiction", count: 89 },
-    { name: "Science", count: 56 },
-    { name: "Histoire", count: 43 },
-    { name: "Biographie", count: 32 },
-  ]
+  categories: Genre[] = []
+  isLoadingGenres = true
+
+  constructor(
+    private booksService: BooksService,
+    private router: Router,
+  ) {}
+
+  ngOnInit() {
+    this.loadGenres()
+  }
+
+  loadGenres() {
+    this.isLoadingGenres = true
+    this.booksService.getGenres().subscribe({
+      next: (genres) => {
+        this.categories = genres
+        this.isLoadingGenres = false
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement des genres:", error)
+        this.isLoadingGenres = false
+      },
+    })
+  }
+
+  onGenreClick(genre: Genre, event: Event) {
+    event.preventDefault()
+    this.router.navigate(["/home"], { queryParams: { genre: genre.name } })
+    this.closeSidebar()
+  }
 
   closeSidebar() {
-    this.isOpenChange.emit(false); 
+    this.isOpenChange.emit(false)
   }
 
   onMenuItemClick(item: any) {

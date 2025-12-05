@@ -1,0 +1,126 @@
+<div class="book-details-container">
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
+
+  <div class="main-content" [class.sidebar-closed]="!sidebarOpen">
+    <app-header 
+      class="fixed-header"
+      (toggleSidebar)="toggleSidebar()"
+    ></app-header>
+    
+    <main class="content">
+      <!-- Indicateur de chargement -->
+      <div *ngIf="isLoading" class="loading-section">
+        <div class="loading-spinner"></div>
+        <p>Chargement des détails...</p>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="error && !isLoading" class="error-section">
+        <p>{{ error }}</p>
+        <div class="error-actions">
+          <button class="retry-button" (click)="retry()">Réessayer</button>
+          <button class="back-button" (click)="goBack()">Retour à l'accueil</button>
+        </div>
+      </div>
+
+      <!-- Détails du livre -->
+      <div *ngIf="book && !isLoading && !error" class="book-details-content">
+
+        <div class="book-details-grid">
+          <div class="book-cover-section">
+            <div class="book-cover-large">
+              <img [src]="book.cover" [alt]="book.title" />
+            </div>
+          </div>
+
+          <div class="book-info-section">
+            <h1 class="book-title-large">{{ book.title }}</h1>
+
+            <div class="book-meta-large">
+              <div class="meta-item">
+                <span class="meta-label">Note</span>
+                <div class="rating-display">
+                  <span class="rating-number">{{ formatRating(book.rating) }}</span>
+                  <div class="stars">
+                    <span 
+                      *ngFor="let star of getStars(book.rating)" 
+                      class="star"
+                      [class.full]="star === 'full'"
+                      [class.half]="star === 'half'"
+                      [class.empty]="star === 'empty'"
+                    >★</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="meta-item">
+                <span class="meta-label">Genre</span>
+                <span class="meta-value genre-badge">{{ book.genre }}</span>
+              </div>
+
+              <div class="meta-item" *ngIf="book.publishedDate">
+                <span class="meta-label">Date de publication</span>
+                <span class="meta-value">{{ book.publishedDate }}</span>
+              </div>
+            </div>
+
+            <div class="book-description" *ngIf="book.description">
+              <h2 class="description-title">Synopsis</h2>
+              <p class="description-text" [innerHTML]="book.description"></p>
+            </div>
+
+            <div class="action-buttons">
+              <!-- Dynamic button for reading status -->
+              <button 
+                *ngIf="!isInReading && !isFinished" 
+                class="primary-button"
+                (click)="startReading()"
+                [disabled]="isLoadingStatus"
+              >
+                Commencer la lecture
+              </button>
+
+              <button 
+                *ngIf="isInReading && !isFinished" 
+                class="primary-button reading-active"
+                (click)="continueReading()"
+              >
+                
+                Continuer la lecture
+              </button>
+
+              <button 
+                *ngIf="isInReading && !isFinished" 
+                class="finish-button"
+                (click)="finishReading()"
+              >
+                <span class="button-icon">✓</span>
+                Terminer la lecture
+              </button>
+
+              <button 
+                *ngIf="isFinished" 
+                class="finished-badge"
+                disabled
+              >
+                <span class="button-icon">✓</span>
+                Terminé
+              </button>
+
+              <!-- Toggle favorite button -->
+              <button 
+                class="secondary-button"
+                [class.favorite-active]="isInFavorites"
+                (click)="toggleFavorite()"
+                [disabled]="isLoadingStatus"
+              >
+                <span class="button-icon">{{ isInFavorites ? '★' : '☆' }}</span>
+                {{ isInFavorites ? 'Dans mes favoris' : 'Ajouter à ma liste' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

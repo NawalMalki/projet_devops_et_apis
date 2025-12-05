@@ -3,6 +3,7 @@ import { provideRouter } from "@angular/router"
 import { provideAnimations } from "@angular/platform-browser/animations"
 import { provideFirebaseApp, initializeApp } from "@angular/fire/app"
 import { provideAuth, getAuth } from "@angular/fire/auth"
+import { provideFirestore, getFirestore } from "@angular/fire/firestore"
 import { routes } from "./app.routes"
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 
@@ -22,8 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
-    provideRouter(routes),
-    provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi())
+    provideFirestore(() => getFirestore()),
+    provideHttpClient(withInterceptorsFromDi()),
   ],
 }
