@@ -40,7 +40,7 @@ export class SignUpComponent implements OnDestroy {
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    
+
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
@@ -66,11 +66,32 @@ export class SignUpComponent implements OnDestroy {
       try {
         const { fullName, email, password } = this.signUpForm.value;
         const user = await this.authService.signUpWithEmail(email, password, fullName);
-        
-        this.successMessage = 'Inscription réussie ! Redirection...';
+
+        this.successMessage = 'Inscription réussie ! Bienvenue ' + fullName;
         setTimeout(() => {
           this.router.navigate(['/home']);
-        }, 2000);
+        }, 1500);
+      } catch (error: any) {
+        this.handleAuthError(error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
+  // Connexion avec Google
+  async signInWithGoogle() {
+    if (!this.loading) {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      try {
+        const user = await this.authService.signInWithGoogle();
+        this.successMessage = 'Connexion Google réussie ! Bienvenue ' + (user.displayName || user.email);
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1500);
       } catch (error: any) {
         this.handleAuthError(error);
       } finally {
@@ -88,11 +109,10 @@ export class SignUpComponent implements OnDestroy {
 
       try {
         const user = await this.authService.signInWithFacebook();
-        
         this.successMessage = 'Connexion Facebook réussie ! Bienvenue ' + (user.displayName || user.email);
         setTimeout(() => {
           this.router.navigate(['/home']);
-        }, 2000);
+        }, 1500);
       } catch (error: any) {
         this.handleAuthError(error);
       } finally {
@@ -104,7 +124,7 @@ export class SignUpComponent implements OnDestroy {
   // Gérer les erreurs d'authentification
   private handleAuthError(error: any) {
     console.error('Erreur d\'authentification:', error);
-    
+
     switch (error.code) {
       case 'auth/email-already-in-use':
         this.errorMessage = 'Cette adresse email est déjà utilisée.';
@@ -116,7 +136,7 @@ export class SignUpComponent implements OnDestroy {
         this.errorMessage = 'Le mot de passe est trop faible.';
         break;
       case 'auth/popup-closed-by-user':
-        this.errorMessage = 'La connexion Facebook a été annulée.';
+        this.errorMessage = 'La connexion a été annulée.';
         break;
       case 'auth/account-exists-with-different-credential':
         this.errorMessage = 'Un compte existe déjà avec cette adresse email.';
