@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "dist/projet-devops-et-apis/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

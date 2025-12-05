@@ -1,0 +1,46 @@
+<aside class="sidebar playfair-display-font" [class.sidebar-closed]="!isOpen">
+ <button (click)="closeSidebar()" class="close-btn">×</button>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <h3 class="nav-section-title">Menu</h3>
+      <ul class="nav-list">
+        <li *ngFor="let item of menuItems">
+          <a 
+            [routerLink]="item.route" 
+            class="nav-item"
+            [class.nav-item-active]="item.active"
+            (click)="onMenuItemClick(item)"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <h3 class="nav-section-title">Catégories</h3>
+      <ul class="nav-list">
+        <li *ngFor="let category of categories">
+          <a href="#" class="nav-item">
+            <span class="nav-label">{{ category.name }}</span>
+            <span class="nav-count">{{ category.count }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="storage-info">
+        <div class="storage-header">
+          <span class="storage-icon">💾</span>
+          <span class="storage-label">Stockage</span>
+        </div>
+        <div class="storage-bar">
+          <div class="storage-progress" style="width: 65%"></div>
+        </div>
+        <p class="storage-text">65% of 100 GB used</p>
+      </div>
+    </div>
+  </nav>
+</aside>

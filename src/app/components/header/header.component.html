@@ -1,0 +1,59 @@
+<header class="header playfair-display-font2">
+  <div class="header-left">
+    <button class="menu-toggle" (click)="onToggleSidebar()">
+      <span class="hamburger-icon">☰</span>
+    </button>
+    <img src="assets/images/logo.jpg"/>
+    <h1 class="header-logo">BookBuddies</h1>
+  </div>
+
+  <div class="header-center">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Cherchez des livres, des auteurs, des genres…" 
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <div class="header-right">
+    <button class="icon-button">
+      <span class="notification-icon">🔔</span>
+      <span class="notification-badge">3</span>
+    </button>
+
+    <div class="profile-dropdown">
+      <button class="profile-button" (click)="toggleProfileMenu()">
+        <img [src]="userProfile.avatar" alt="Profile" class="profile-avatar" />
+        <span class="profile-name">{{ userProfile.name }}</span>
+        <span class="dropdown-arrow">▼</span>
+      </button>
+
+      <div class="dropdown-menu" *ngIf="showProfileMenu">
+        <div class="dropdown-header">
+          <img [src]="userProfile.avatar" alt="Profile" class="dropdown-avatar" />
+          <div class="dropdown-user-info">
+            <p class="dropdown-name">{{ userProfile.name }}</p>
+            <p class="dropdown-email">{{ userProfile.email }}</p>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item">
+          <span>👤</span> Mon profil
+        </a>
+        <a href="#" class="dropdown-item">
+          <span>📚</span> Ma bibliothèque
+        </a>
+        <a href="#" class="dropdown-item">
+          <span>⚙️</span> Paramètres
+        </a>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item logout" (click)="onLogout()">
+          <span>🚪</span> Se déconnecter
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

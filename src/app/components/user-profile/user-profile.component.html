@@ -1,0 +1,77 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-banner"></div>
+    <div class="profile-info">
+      <div class="avatar-section">
+        <img [src]="user.avatar" alt="Profil" class="profile-avatar" />
+        <button class="avatar-edit-button" *ngIf="isEditMode">
+          <span>📷</span>
+        </button>
+      </div>
+      <div class="user-details">
+        <h1 class="user-name" *ngIf="!isEditMode">{{ user.name }}</h1>
+        <input 
+          type="text" 
+          class="user-name-input" 
+          [value]="user.name" 
+          *ngIf="isEditMode"
+        />
+        <p class="user-email">{{ user.email }}</p>
+        <p class="user-bio" *ngIf="!isEditMode">{{ user.bio }}</p>
+        <textarea 
+          class="user-bio-input" 
+          *ngIf="isEditMode"
+          [value]="user.bio"
+        ></textarea>
+        <p class="user-join-date">Membre depuis {{ user.joinDate }}</p>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-edit" *ngIf="!isEditMode" (click)="toggleEditMode()">
+          Modifier le profil
+        </button>
+        <button class="btn-save" *ngIf="isEditMode" (click)="saveProfile()">
+          Enregistrer les modifications
+        </button>
+        <button class="btn-cancel" *ngIf="isEditMode" (click)="toggleEditMode()">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-value">{{ user.stats.booksRead }}</div>
+      <div class="stat-label">Livres lus</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📖</div>
+      <div class="stat-value">{{ user.stats.currentlyReading }}</div>
+      <div class="stat-label">En cours de lecture</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-value">{{ user.stats.favorites }}</div>
+      <div class="stat-label">Favoris</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✍️</div>
+      <div class="stat-value">{{ user.stats.reviews }}</div>
+      <div class="stat-label">Avis</div>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="content-tabs">
+      <button class="tab-button tab-active">Activité de lecture</button>
+      <button class="tab-button">Favoris</button>
+      <button class="tab-button">Avis</button>
+      <button class="tab-button">Paramètres</button>
+    </div>
+
+    <div class="tab-content">
+      <p class="empty-state">Votre activité de lecture apparaîtra ici</p>
+    </div>
+  </div>
+</div>
