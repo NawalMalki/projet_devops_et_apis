@@ -92,13 +92,14 @@
 /* --- Books Grid --- */
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 1.5rem;
 }
 
 .book-card {
   background: white;
   border-radius: 0.75rem;
+  border : 1px solid rgb(128, 108, 24); 
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
@@ -138,7 +139,7 @@
 }
 
 .overlay-button {
-  background: white;
+  background: rgba(192, 165, 89, 0.918);
   color: #1a1a1a;
   border: none;
   padding: 0.75rem 1.5rem;

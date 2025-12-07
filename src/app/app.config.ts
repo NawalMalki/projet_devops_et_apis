@@ -1,7 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -22,6 +22,7 @@ export const appConfig: ApplicationConfig = {
       measurementId: "G-4RTSGDK235"
     })),
     provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore())
-  ]
-};
+    provideFirestore(() => getFirestore()),
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+}

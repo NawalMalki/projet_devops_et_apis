@@ -123,6 +123,14 @@
   justify-content: center;
 }
 
+
+.search-button{
+  border: none;
+  cursor : pointer; 
+  padding : 12px; 
+  border-radius : 20px; 
+  font-size: 16px;
+}
 .icon-button:hover {
   background: #f5f5f5;
   border-radius: 0.5rem;

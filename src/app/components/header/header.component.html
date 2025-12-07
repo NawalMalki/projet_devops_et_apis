@@ -3,19 +3,27 @@
     <button class="menu-toggle" (click)="onToggleSidebar()">
       <span class="hamburger-icon">☰</span>
     </button>
-    <!-- Fixed image path to logo.jpg (was logo1.jpg) and use /assets path -->
-    <img src="/assets/images/logo.jpg" alt="BookBuddies Logo" class="image-logo" />
+    <!-- Chemin corrigé sans le / au début -->
+    <img src="assets/images/logo.jpg" alt="BookBuddies Logo" class="image-logo" />
     <h1 class="header-logo">BookBuddies</h1>
   </div>
 
   <div class="header-center">
     <div class="search-bar">
-      <span class="search-icon">🔍</span>
       <input 
         type="text" 
         placeholder="Cherchez des livres, des auteurs, des genres…" 
         class="search-input"
+        [(ngModel)]="searchQuery"
+        (keypress)="onSearchKeyPress($event)"
       />
+      <button 
+        class="search-button" 
+        (click)="onSearch()"
+        *ngIf="searchQuery.trim()"
+      >
+        🔍
+      </button>
     </div>
   </div>
 
@@ -42,17 +50,14 @@
         </div>
         <div class="dropdown-divider"></div>
         <a href="#" class="dropdown-item">
-          <span>👤</span> Mon profil
+          👤 Mon profil
         </a>
         <a href="#" class="dropdown-item">
-          <span>📚</span> Ma bibliothèque
-        </a>
-        <a href="#" class="dropdown-item">
-          <span>⚙️</span> Paramètres
+          📚 Ma bibliothèque
         </a>
         <div class="dropdown-divider"></div>
         <button class="dropdown-item logout" (click)="onLogout()">
-          <span>🚪</span> Se déconnecter
+          🚪 Se déconnecter
         </button>
       </div>
     </div>

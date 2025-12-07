@@ -1,0 +1,54 @@
+<div class="favorites-container">
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
+
+  <div class="main-content" [class.sidebar-closed]="!sidebarOpen">
+    <app-header class="fixed-header" (toggleSidebar)="toggleSidebar()"></app-header>
+    
+    <main class="content">
+      <section class="hero-section">
+        <h1 class="hero-title">Mes Favoris</h1>
+        <p class="hero-subtitle">Vos livres préférés en un coup d'œil</p>
+      </section>
+
+      <section class="content-in">
+        <div *ngIf="isLoading" class="loading-section">
+          <div class="loading-spinner"></div>
+          <p>Chargement...</p>
+        </div>
+
+        <div *ngIf="error && !isLoading" class="error-section">
+          <p>{{ error }}</p>
+          <button class="retry-button" (click)="loadFavorites()">Réessayer</button>
+        </div>
+
+        <div *ngIf="!isLoading && !error && books.length === 0" class="empty-section">
+          <div class="empty-icon">⭐</div>
+          <h2>Aucun favori</h2>
+          <p>Ajoutez vos livres préférés à votre liste de favoris</p>
+          <button class="primary-button" (click)="router.navigate(['/home'])">Découvrir des livres</button>
+        </div>
+
+        <section class="section" *ngIf="!isLoading && !error && books.length > 0">
+          <div class="books-grid">
+            <div class="book-card-container" *ngFor="let book of books">
+              <div class="book-card" (click)="onBookClick(book)">
+                <div class="book-cover-wrapper">
+                  <img [src]="book.cover" [alt]="book.title" class="book-cover"/>
+                  <div class="favorite-badge">★</div>
+                </div>
+                <div class="book-info">
+                  <h3 class="book-title">{{ book.title }}</h3>
+                  <p class="book-author">{{ book.author }}</p>
+                  <div class="book-meta">
+                    <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
+                    <span class="book-genre">{{ book.genre }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</div>
