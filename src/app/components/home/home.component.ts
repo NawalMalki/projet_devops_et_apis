@@ -1,122 +1,92 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { Router, ActivatedRoute } from "@angular/router";
-import { HeaderComponent } from "../header/header.component";
-import { SidebarComponent } from "../sidebar/sidebar.component";
-import { BooksService, Book } from "../../services/books.service";
+import { Component, OnInit } from "@angular/core"
+import { CommonModule } from "@angular/common"
+import { Router, ActivatedRoute } from "@angular/router"
+import { SidebarComponent } from "../sidebar/sidebar.component"
+import { HeaderComponent } from "../header/header.component"
+import { BooksService, Book } from "../../services/books.service"
 
 @Component({
   selector: "app-home",
   templateUrl: "./home.component.html",
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, SidebarComponent, HeaderComponent],
   styleUrls: ["./home.component.css"],
 })
 export class HomeComponent implements OnInit {
-  sidebarOpen = false;
-  books: Book[] = [];
-  isLoading = true;
-  error: string | null = null;
-
-  // Track the current search query
-  searchQuery: string | null = null;
+  sidebarOpen = false
+  books: Book[] = []
+  isLoading = false
+  error: string | null = null
 
   constructor(
     private booksService: BooksService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute  // ✅ AJOUTÉ pour écouter les queryParams
   ) {}
 
   ngOnInit() {
-    // Subscribe to query params to catch search queries
-    this.route.queryParams.subscribe((params) => {
-      this.searchQuery = params['search'] || null;
-      this.loadBooks(); // Reload books whenever search query changes
-    });
-  }
-
-  onBookClick(book: Book) {
-    this.router.navigate(["/book", book.id]);
+    // ✅ NOUVEAU : Écouter les changements de genre depuis la sidebar
+    this.route.queryParams.subscribe(params => {
+      const genre = params['genre']
+      
+      if (genre) {
+        // Si un genre est sélectionné, charger les livres de ce genre
+        this.loadBooksByGenre(genre)
+      } else {
+        // Sinon, charger tous les livres
+        this.loadBooks()
+      }
+    })
   }
 
   loadBooks() {
-    this.isLoading = true;
-    this.error = null;
-
-    let books$;
-
-    if (this.searchQuery?.trim()) {
-      // Use the search query from the header
-      books$ = this.booksService.getBooks(this.searchQuery.trim());
-    } else {
-      // Default load
-      books$ = this.booksService.getBooks("fiction");
-    }
-
-    books$.subscribe({
+    this.isLoading = true
+    this.error = null
+    
+    this.booksService.getBooks("fiction", 40).subscribe({
       next: (books) => {
-        this.books = books;
-        this.isLoading = false;
+        this.books = books
+        this.isLoading = false
       },
       error: (error) => {
-        console.error("Erreur lors du chargement des livres:", error);
-        this.error = "Impossible de charger les livres. Veuillez réessayer.";
-        this.isLoading = false;
-        this.books = this.getFallbackBooks();
+        console.error("Erreur lors du chargement des livres:", error)
+        this.error = "Impossible de charger les livres. Veuillez réessayer."
+        this.isLoading = false
       },
-    });
+    })
+  }
+
+  // ✅ NOUVELLE MÉTHODE pour charger par genre
+  loadBooksByGenre(genre: string) {
+    this.isLoading = true
+    this.error = null
+    
+    this.booksService.getBooksByGenre(genre, 40).subscribe({
+      next: (books) => {
+        this.books = books
+        this.isLoading = false
+        
+        if (books.length === 0) {
+          this.error = `Aucun livre trouvé pour "${genre}"`
+        }
+      },
+      error: (error) => {
+        console.error(`Erreur genre ${genre}:`, error)
+        this.error = `Impossible de charger "${genre}".`
+        this.isLoading = false
+      },
+    })
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    this.sidebarOpen = !this.sidebarOpen
+  }
+
+  onBookClick(book: Book) {
+    this.router.navigate(["/book", book.id])
   }
 
   formatRating(rating: number): string {
-    return rating.toFixed(1);
-  }
-
-  handleImageError(book: Book) {
-    book.cover = this.getDefaultCover();
-  }
-
-  getDefaultCover(): string {
-    return "https://via.placeholder.com/150x200/cccccc/666666?text=Couverture+non+disponible";
-  }
-
-  private getFallbackBooks(): Book[] {
-    return [
-      {
-        id: "1",
-        title: "The Great Gatsby",
-        author: "F. Scott Fitzgerald",
-        cover: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
-        rating: 4.5,
-        genre: "Fiction",
-      },
-      {
-        id: "2",
-        title: "1984",
-        author: "George Orwell",
-        cover: "https://covers.openlibrary.org/b/id/7222339-L.jpg",
-        rating: 4.8,
-        genre: "Fiction",
-      },
-      {
-        id: "3",
-        title: "To Kill a Mockingbird",
-        author: "Harper Lee",
-        cover: "https://covers.openlibrary.org/b/id/8228691-L.jpg",
-        rating: 4.7,
-        genre: "Fiction",
-      },
-      {
-        id: "4",
-        title: "Pride and Prejudice",
-        author: "Jane Austen",
-        cover: "https://covers.openlibrary.org/b/id/8235657-L.jpg",
-        rating: 4.6,
-        genre: "Romance",
-      },
-    ];
+    return rating.toFixed(1)
   }
 }

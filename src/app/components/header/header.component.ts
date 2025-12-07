@@ -69,7 +69,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showProfileMenu = !this.showProfileMenu
   }
 
-  onSearch() {
+onSearch() {
     if (this.searchQuery.trim()) {
       // Naviguer vers home avec la requête de recherche
       this.router.navigate(["/home"], {
