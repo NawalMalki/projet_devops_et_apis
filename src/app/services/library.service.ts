@@ -11,8 +11,9 @@ import {
   Timestamp,
 } from "@angular/fire/firestore";
 import { Auth } from "@angular/fire/auth";
-import { Observable, from, map, of } from "rxjs";
+import { Observable, from, map, of, switchMap } from "rxjs";
 import { Book } from "./books.service";
+import { NotificationService } from "./notification.service";
 
 export interface UserBook extends Book {
   userId: string;
@@ -24,15 +25,16 @@ export interface UserBook extends Book {
   providedIn: "root",
 })
 export class LibraryService {
-  constructor(private firestore: Firestore, private auth: Auth) {}
+  constructor(
+    private firestore: Firestore,
+    private auth: Auth,
+    private notificationService: NotificationService
+  ) {}
 
   private getCurrentUserId(): string | null {
     return this.auth.currentUser?.uid || null;
   }
 
-  // ---------------------------
-  // Méthode utilitaire : supprime les champs undefined
-  // ---------------------------
   private sanitizeForFirestore(data: any) {
     const sanitized: any = {};
     Object.keys(data).forEach((key) => {
@@ -44,7 +46,7 @@ export class LibraryService {
   }
 
   // ---------------------------
-  // ADD TO READING
+  // ADD TO READING (avec notification)
   // ---------------------------
   addToReading(book: Book): Observable<void> {
     const userId = this.getCurrentUserId();
@@ -59,11 +61,15 @@ export class LibraryService {
       status: "reading",
     });
 
-    return from(addDoc(readingCollection, bookData).then(() => {}));
+    return from(addDoc(readingCollection, bookData)).pipe(
+      switchMap(() => 
+        this.notificationService.notifyBookAdded(book.title, book.id, book.cover)
+      )
+    );
   }
 
   // ---------------------------
-  // ADD TO FAVORITES
+  // ADD TO FAVORITES (avec notification)
   // ---------------------------
   addToFavorites(book: Book): Observable<void> {
     const userId = this.getCurrentUserId();
@@ -78,11 +84,15 @@ export class LibraryService {
       status: "favorite",
     });
 
-    return from(addDoc(favoritesCollection, bookData).then(() => {}));
+    return from(addDoc(favoritesCollection, bookData)).pipe(
+      switchMap(() => 
+        this.notificationService.notifyBookFavorite(book.title, book.id, book.cover)
+      )
+    );
   }
 
   // ---------------------------
-  // MARK AS FINISHED
+  // MARK AS FINISHED (avec notification)
   // ---------------------------
   markAsFinished(book: Book): Observable<void> {
     const userId = this.getCurrentUserId();
@@ -101,8 +111,12 @@ export class LibraryService {
             status: "finished",
           });
 
-          return addDoc(finishedCollection, bookData).then(() => {});
+          return addDoc(finishedCollection, bookData);
         })
+    ).pipe(
+      switchMap(() => 
+        this.notificationService.notifyBookFinished(book.title, book.id, book.cover)
+      )
     );
   }
 
