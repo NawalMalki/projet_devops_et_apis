@@ -1,77 +1,146 @@
 <div class="profile-container">
-  <div class="profile-header">
-    <div class="profile-banner"></div>
-    <div class="profile-info">
-      <div class="avatar-section">
-        <img [src]="user.avatar" alt="Profil" class="profile-avatar" />
-        <button class="avatar-edit-button" *ngIf="isEditMode">
-          <span>📷</span>
-        </button>
-      </div>
-      <div class="user-details">
-        <h1 class="user-name" *ngIf="!isEditMode">{{ user.name }}</h1>
-        <input 
-          type="text" 
-          class="user-name-input" 
-          [value]="user.name" 
-          *ngIf="isEditMode"
-        />
-        <p class="user-email">{{ user.email }}</p>
-        <p class="user-bio" *ngIf="!isEditMode">{{ user.bio }}</p>
-        <textarea 
-          class="user-bio-input" 
-          *ngIf="isEditMode"
-          [value]="user.bio"
-        ></textarea>
-        <p class="user-join-date">Membre depuis {{ user.joinDate }}</p>
-      </div>
-      <div class="profile-actions">
-        <button class="btn-edit" *ngIf="!isEditMode" (click)="toggleEditMode()">
-          Modifier le profil
-        </button>
-        <button class="btn-save" *ngIf="isEditMode" (click)="saveProfile()">
-          Enregistrer les modifications
-        </button>
-        <button class="btn-cancel" *ngIf="isEditMode" (click)="toggleEditMode()">
-          Annuler
-        </button>
-      </div>
-    </div>
+
+  <!-- BOUTON RETOUR -->
+  <button class="back-button" (click)="router.navigate(['/home'])">
+    ← Retour à l'accueil
+  </button>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement du profil...</p>
   </div>
 
-  <div class="profile-stats">
-    <div class="stat-card">
-      <div class="stat-icon">📚</div>
-      <div class="stat-value">{{ user.stats.booksRead }}</div>
-      <div class="stat-label">Livres lus</div>
+  <!-- PROFIL -->
+  <div *ngIf="!loading && currentUser">
+
+    <div class="profile-header">
+      <div class="profile-banner"></div>
+
+      <div class="profile-info">
+
+        <div class="avatar-section">
+          <img [src]="userProfile.avatar" alt="Profil" class="profile-avatar" />
+        </div>
+
+        <div class="user-details">
+
+          <h1 class="user-name" *ngIf="!isEditMode">
+            {{ userProfile.name }}
+          </h1>
+
+          <input
+            *ngIf="isEditMode"
+            class="user-name-input"
+            [value]="editForm.name"
+            (input)="editForm.name = $any($event.target).value"
+          />
+
+          <p class="user-email">{{ userProfile.email }}</p>
+
+          <p class="user-bio" *ngIf="!isEditMode">
+            {{ userProfile.bio || 'Ajoutez une bio...' }}
+          </p>
+
+          <textarea
+            *ngIf="isEditMode"
+            class="user-bio-input"
+            rows="4"
+            (input)="editForm.bio = $any($event.target).value"
+          >{{ editForm.bio }}</textarea>
+
+          <p class="user-join-date">
+            Membre depuis {{ userProfile.joinDate }}
+          </p>
+
+        </div>
+
+        <div class="profile-actions">
+
+          <button
+            *ngIf="!isEditMode"
+            class="btn-edit"
+            (click)="toggleEditMode()">
+            Modifier le profil
+          </button>
+
+          <button
+            *ngIf="isEditMode"
+            class="btn-save"
+            (click)="saveProfile()"
+            [disabled]="saving">
+            Enregistrer
+          </button>
+
+          <button
+            *ngIf="isEditMode"
+            class="btn-cancel"
+            (click)="cancelEdit()">
+            Annuler
+          </button>
+
+        </div>
+
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">📖</div>
-      <div class="stat-value">{{ user.stats.currentlyReading }}</div>
-      <div class="stat-label">En cours de lecture</div>
+
+    <!-- STATS -->
+    <div class="profile-stats">
+      <div class="stat-card">📚 {{ userProfile.stats.booksRead }}</div>
+      <div class="stat-card">📖 {{ userProfile.stats.currentlyReading }}</div>
+      <div class="stat-card">⭐ {{ userProfile.stats.favorites }}</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">⭐</div>
-      <div class="stat-value">{{ user.stats.favorites }}</div>
-      <div class="stat-label">Favoris</div>
+
+    <!-- CONTENT -->
+    <div class="profile-content">
+
+      <!-- TABS -->
+      <div class="content-tabs">
+        <button 
+          class="tab-button"
+          [class.tab-active]="activeTab === 'favorites'"
+          (click)="switchTab('favorites')">
+          Numéro de partages
+        </button>
+
+        <button 
+          class="tab-button"
+          [class.tab-active]="activeTab === 'settings'"
+          (click)="switchTab('settings')">
+          ⚙️ Paramètres
+        </button>
+      </div>
+      
+      <!-- SETTINGS TAB -->
+      <div *ngIf="activeTab === 'settings'" class="settings-tab">
+          
+
+
+          <div class="danger-zone">
+           
+            <p class="danger-description">
+              Cette action est irréversible.
+               <button
+              class="btn-danger"
+              (click)="onDeleteAccount()"
+            >
+              Supprimer le compte
+            </button>
+            </p>
+           
+          </div>
+
+      
+
+      </div>
+
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">✍️</div>
-      <div class="stat-value">{{ user.stats.reviews }}</div>
-      <div class="stat-label">Avis</div>
-    </div>
+
   </div>
 
-  <div class="profile-content">
-    <div class="content-tabs">
-      <button class="tab-button tab-active">Activité de lecture</button>
-      <button class="tab-button">Favoris</button>
-      <button class="tab-button">Avis</button>
-      <button class="tab-button">Paramètres</button>
-    </div>
-
-    <div class="tab-content">
-      <p class="empty-state">Votre activité de lecture apparaîtra ici</p>
-    </div>
+  <!-- PAS CONNECTÉ -->
+  <div *ngIf="!loading && !currentUser" class="error-state">
+    <p>Veuillez vous reconnecter.</p>
   </div>
+
 </div>

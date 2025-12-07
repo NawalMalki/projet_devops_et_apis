@@ -113,21 +113,23 @@
 }
 
 .profile-actions {
-  display: flex;
-  gap: 0.75rem;
   padding-top: 1rem;
 }
 
 .btn-edit,
 .btn-save,
 .btn-cancel {
-  padding: 0.5rem 1rem;
+  padding: 1rem 1rem;
   border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
   font-size: 0.9375rem;
+}
+
+.btn-save{
+  margin-right: 10px;
 }
 
 .btn-edit,
@@ -247,4 +249,108 @@
     overflow-x: auto;
     gap: 1rem;
   }
+}
+
+/* ============================= */
+/* FAVORITES GRID FIXED 4 COLS CENTERED */
+/* ============================= */
+.favorites-tab .favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px; /* limite la largeur */
+  margin: 0 auto;    /* centre le grid */
+}
+
+.favorite-book-card {
+  width: 100%;
+}
+
+/* ============================= */
+/* SETTINGS TAB CLEANUP */
+/* ============================= */
+.settings-tab {
+  padding: 2rem;
+  display: flex;
+  justify-content: center; 
+}
+
+.settings-section {
+  width: 100%;
+  max-width: 600px; 
+  padding : 20px;
+  border-radius : 20px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.danger-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.btn-danger {
+  background-color: rgb(253, 81, 81);
+  border : none; 
+  color : white; 
+  cursor : pointer; 
+  padding : 15px; 
+  border-radius: 20px;
+}
+
+
+.danger-description{
+  background-color: rgba(255, 0, 0, 0.39);
+  border-radius: 20px;
+  padding : 20px; 
+}
+
+/* ============================= */
+/* SUCCESS ALERT CENTERED */
+/* ============================= */
+.alert-success {
+  text-align: center;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+/* ============================= */
+/* BACK BUTTON */
+.back-button {
+  background: #1a1a1a;
+  color: white;
+  border: 2px solid #1a1a1a;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 20px;
+  border-radius: 0.75rem;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background: #000;
+  color: white;
+}
+
+/* ============================= */
+/* LOADING STATE FOR FAVORITES OR PROFILE */
+.loading-state, .loading-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e5e7eb;
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
