@@ -28,11 +28,84 @@
   </div>
 
   <div class="header-right">
-    <button class="icon-button">
-      <span class="notification-icon">🔔</span>
-      <span class="notification-badge">3</span>
-    </button>
+    <!-- NOTIFICATIONS DROPDOWN -->
+    <div class="notification-dropdown">
+      <button class="icon-button" (click)="toggleNotifications()">
+        <span class="notification-icon">🔔</span>
+        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
 
+      <div class="notifications-menu" *ngIf="showNotifications">
+        <div class="notifications-header">
+          <h3>Notifications</h3>
+          <div class="notifications-actions">
+            <button 
+              class="action-btn" 
+              (click)="markAllAsRead()"
+              *ngIf="unreadCount > 0"
+              title="Tout marquer comme lu"
+            >
+              ✓
+            </button>
+            <button 
+              class="action-btn" 
+              (click)="clearAllNotifications()"
+              *ngIf="notifications.length > 0"
+              title="Tout effacer"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div class="notifications-list">
+          <!-- Empty state -->
+          <div class="empty-notifications" *ngIf="notifications.length === 0">
+            <span class="empty-icon">🔔</span>
+            <p>Aucune notification</p>
+          </div>
+
+          <!-- Notifications -->
+          <div 
+            class="notification-item" 
+            *ngFor="let notif of notifications"
+            [class.unread]="!notif.isRead"
+            (click)="onNotificationClick(notif)"
+          >
+            <div class="notification-icon-wrapper">
+              <span class="notif-type-icon">{{ getNotificationIcon(notif.type) }}</span>
+            </div>
+            
+            <div class="notification-content">
+              <div class="notification-header-row">
+                <h4 class="notification-title">{{ notif.title }}</h4>
+                <button 
+                  class="delete-notif-btn" 
+                  (click)="deleteNotification($event, notif.id!)"
+                  title="Supprimer"
+                >
+                  ✕
+                </button>
+              </div>
+              <p class="notification-message">{{ notif.message }}</p>
+              
+              <div class="notification-book-info" *ngIf="notif.bookCover">
+                <img [src]="notif.bookCover" [alt]="notif.bookTitle" class="notif-book-cover" />
+                <span class="notif-book-title">{{ notif.bookTitle }}</span>
+              </div>
+              
+              <span class="notification-time">{{ getTimeAgo(notif.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="notifications-footer" *ngIf="notifications.length > 5">
+          <button class="view-all-btn">Voir toutes les notifications</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE DROPDOWN -->
     <div class="profile-dropdown">
       <button class="profile-button" (click)="toggleProfileMenu()">
         <img [src]="userProfile.avatar" alt="Profile" class="profile-avatar" />

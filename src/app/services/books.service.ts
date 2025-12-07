@@ -27,7 +27,7 @@ export interface Genre {
 })
 export class BooksService {
   private apiUrl = "https://www.googleapis.com/books/v1/volumes"
-  private apiKey = "AIzaSyB4av8y41-vDN6Juac7Ftwz916DNcW6dJQ"
+  // ❌ PLUS BESOIN DE CLÉ API !
   private genresCache: Genre[] | null = null
 
   constructor(private http: HttpClient) {}
@@ -41,13 +41,13 @@ export class BooksService {
     const selectedGenres = genres.sort(() => 0.5 - Math.random()).slice(0, 3)
     
     const requests = selectedGenres.map(genre => {
-      const query = `subject:${genre} language:fr`
+      const query = `subject:${genre}`
       
       const params = new HttpParams()
         .set('q', query)
+        .set('langRestrict', 'fr')  // ✅ Utilise langRestrict au lieu de language:fr
         .set('orderBy', 'relevance')
         .set('maxResults', Math.floor(40 / 3).toString())
-        .set('key', this.apiKey)
       
       return this.http.get<any>(this.apiUrl, { params })
     })
@@ -72,13 +72,13 @@ export class BooksService {
   }
 
   getFrenchLiteratureBooks(maxResults = 40): Observable<Book[]> {
-    const query = 'subject:fiction language:fr'
+    const query = 'subject:fiction'
     
     const params = new HttpParams()
       .set('q', query)
+      .set('langRestrict', 'fr')
       .set('orderBy', 'newest')
       .set('maxResults', maxResults.toString())
-      .set('key', this.apiKey)
     
     return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
@@ -105,13 +105,13 @@ export class BooksService {
   }
 
   getFrenchBestsellers(maxResults = 20): Observable<Book[]> {
-    const query = 'subject:fiction language:fr'
+    const query = 'subject:fiction'
     
     const params = new HttpParams()
       .set('q', query)
+      .set('langRestrict', 'fr')
       .set('orderBy', 'newest')
       .set('maxResults', maxResults.toString())
-      .set('key', this.apiKey)
     
     return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
@@ -129,13 +129,13 @@ export class BooksService {
   }
 
   getFrenchClassics(maxResults = 20): Observable<Book[]> {
-    const query = 'subject:adventure language:fr'
+    const query = 'subject:adventure'
     
     const params = new HttpParams()
       .set('q', query)
+      .set('langRestrict', 'fr')
       .set('orderBy', 'newest')
       .set('maxResults', maxResults.toString())
-      .set('key', this.apiKey)
     
     return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
@@ -155,8 +155,8 @@ export class BooksService {
   getBooks(query = "fiction", maxResults = 12): Observable<Book[]> {
     const params = new HttpParams()
       .set('q', query)
+      .set('langRestrict', 'fr')
       .set('maxResults', Math.min(maxResults, 40).toString())
-      .set('key', this.apiKey)
     
     return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
@@ -168,38 +168,30 @@ export class BooksService {
     )
   }
 
-  /**
-   * Récupère les livres d'un genre spécifique
-   */
   getBooksByGenre(genre: string, maxResults = 40): Observable<Book[]> {
     const genreQueries: { [key: string]: string } = {
-      'fiction': 'subject:fiction language:fr',
-      'romance': 'subject:romance language:fr',
-      'science fiction': 'subject:science fiction language:fr',
-      'thriller': 'subject:thriller language:fr',
-      'fantasy': 'subject:fantasy language:fr',
-      'adventure': 'subject:adventure language:fr',
-      'mystery': 'subject:mystery language:fr'
+      'fiction': 'subject:fiction',
+      'romance': 'subject:romance',
+      'science fiction': 'subject:science fiction',
+      'thriller': 'subject:thriller',
+      'fantasy': 'subject:fantasy',
+      'adventure': 'subject:adventure',
+      'mystery': 'subject:mystery'
     }
     
-    const query = genreQueries[genre.toLowerCase()] || `subject:${genre} language:fr`
-    
-    console.log('🔍 Requête API pour genre unique:', query)
+    const query = genreQueries[genre.toLowerCase()] || `subject:${genre}`
     
     const params = new HttpParams()
       .set('q', query)
+      .set('langRestrict', 'fr')
       .set('orderBy', 'relevance')
       .set('maxResults', Math.min(maxResults, 40).toString())
-      .set('key', this.apiKey)
     
     return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
         if (!response.items) {
-          console.warn('⚠️ Aucun résultat pour:', query)
           return []
         }
-        
-        console.log(`✅ Résultats trouvés pour ${genre}:`, response.items.length)
         
         return response.items
           .map((item: any) => this.mapToBook(item))
@@ -213,9 +205,6 @@ export class BooksService {
     )
   }
 
-  /**
-   * Compte le nombre de livres par genre
-   */
   getGenreCount(genre: string): Observable<number> {
     return this.getBooksByGenre(genre, 40).pipe(
       map(books => books.length)
@@ -223,7 +212,7 @@ export class BooksService {
   }
 
   getBookById(id: string): Observable<Book> {
-    return this.http.get<any>(`${this.apiUrl}/${id}?key=${this.apiKey}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((item) => this.mapToBook(item))
     )
   }
