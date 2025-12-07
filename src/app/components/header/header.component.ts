@@ -33,7 +33,7 @@ export class HeaderComponent {
     this.showProfileMenu = !this.showProfileMenu
   }
 
-  onSearch() {
+onSearch() {
     if (this.searchQuery.trim()) {
       // Navigate to home with search query
       this.router.navigate(["/home"], {
