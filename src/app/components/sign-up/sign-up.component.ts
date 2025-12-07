@@ -121,6 +121,27 @@ export class SignUpComponent implements OnDestroy {
     }
   }
 
+  // Connexion avec Twitter
+  async signInWithTwitter() {
+    if (!this.loading) {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      try {
+        const user = await this.authService.signInWithTwitter();
+        this.successMessage = 'Connexion Twitter réussie ! Bienvenue ' + (user.displayName || user.email);
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1500);
+      } catch (error: any) {
+        this.handleAuthError(error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
   // Gérer les erreurs d'authentification
   private handleAuthError(error: any) {
     console.error('Erreur d\'authentification:', error);

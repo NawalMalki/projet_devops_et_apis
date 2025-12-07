@@ -61,39 +61,38 @@ export class SignInComponent implements OnDestroy {
     }
   }
 
-  // mot de passe oublié
-async forgotPassword() {
-  const emailControl = this.signInForm.get('email');
+  // Mot de passe oublié
+  async forgotPassword() {
+    const emailControl = this.signInForm.get('email');
 
-  if (!emailControl || !emailControl.value) {
-    this.errorMessage = 'Veuillez entrer votre adresse email pour réinitialiser le mot de passe.';
-    return;
-  }
-
-  this.loading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
-
-  try {
-    await this.authService.sendPasswordReset(emailControl.value);
-    this.successMessage = 'Email de réinitialisation envoyé ! Vérifiez votre boîte mail.';
-  } catch (error: any) {
-    console.error('Erreur mot de passe oublié:', error);
-    switch (error.code) {
-      case 'auth/user-not-found':
-        this.errorMessage = 'Aucun compte trouvé avec cette adresse email.';
-        break;
-      case 'auth/invalid-email':
-        this.errorMessage = 'Adresse email invalide.';
-        break;
-      default:
-        this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+    if (!emailControl || !emailControl.value) {
+      this.errorMessage = 'Veuillez entrer votre adresse email pour réinitialiser le mot de passe.';
+      return;
     }
-  } finally {
-    this.loading = false;
-  }
-}
 
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      await this.authService.sendPasswordReset(emailControl.value);
+      this.successMessage = 'Email de réinitialisation envoyé ! Vérifiez votre boîte mail.';
+    } catch (error: any) {
+      console.error('Erreur mot de passe oublié:', error);
+      switch (error.code) {
+        case 'auth/user-not-found':
+          this.errorMessage = 'Aucun compte trouvé avec cette adresse email.';
+          break;
+        case 'auth/invalid-email':
+          this.errorMessage = 'Adresse email invalide.';
+          break;
+        default:
+          this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+      }
+    } finally {
+      this.loading = false;
+    }
+  }
 
   // Connexion avec Google
   async signInWithGoogle() {
@@ -139,38 +138,60 @@ async forgotPassword() {
     }
   }
 
+  // Connexion avec Twitter
+  async signInWithTwitter() {
+    if (!this.loading) {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      try {
+        const user = await this.authService.signInWithTwitter();
+        
+        this.successMessage = 'Connexion Twitter réussie ! Bienvenue ' + (user.displayName || user.email);
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1500);
+      } catch (error: any) {
+        this.handleAuthError(error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
   // Gérer les erreurs d'authentification
   private handleAuthError(error: any) {
     console.error('Erreur d\'authentification:', error);
     
     switch (error.code) {
-  case 'auth/user-not-found':
-    this.errorMessage = 'Aucun compte trouvé avec cette adresse email.';
-    break;
-  case 'auth/wrong-password':
-    this.errorMessage = 'Mot de passe incorrect.';
-    break;
-  case 'auth/invalid-credential':
-    this.errorMessage = 'Identifiants invalides. Vérifiez votre email et votre mot de passe.';
-    break;
-  case 'auth/invalid-email':
-    this.errorMessage = 'Adresse email invalide.';
-    break;
-  case 'auth/user-disabled':
-    this.errorMessage = 'Ce compte a été désactivé.';
-    break;
-  case 'auth/popup-closed-by-user':
-    this.errorMessage = 'La connexion a été annulée.';
-    break;
-  case 'auth/account-exists-with-different-credential':
-    this.errorMessage = 'Un compte existe déjà avec cette adresse email.';
-    break;
-  case 'auth/too-many-requests':
-    this.errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
-    break;
-  default:
-    this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
-}
+      case 'auth/user-not-found':
+        this.errorMessage = 'Aucun compte trouvé avec cette adresse email.';
+        break;
+      case 'auth/wrong-password':
+        this.errorMessage = 'Mot de passe incorrect.';
+        break;
+      case 'auth/invalid-credential':
+        this.errorMessage = 'Identifiants invalides. Vérifiez votre email et votre mot de passe.';
+        break;
+      case 'auth/invalid-email':
+        this.errorMessage = 'Adresse email invalide.';
+        break;
+      case 'auth/user-disabled':
+        this.errorMessage = 'Ce compte a été désactivé.';
+        break;
+      case 'auth/popup-closed-by-user':
+        this.errorMessage = 'La connexion a été annulée.';
+        break;
+      case 'auth/account-exists-with-different-credential':
+        this.errorMessage = 'Un compte existe déjà avec cette adresse email.';
+        break;
+      case 'auth/too-many-requests':
+        this.errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
+        break;
+      default:
+        this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+    }
   }
 
   navigateToSignUp() {
