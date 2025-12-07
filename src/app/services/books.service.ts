@@ -298,4 +298,105 @@ export class BooksService {
   private getDefaultCover(): string {
     return "https://via.placeholder.com/128x192/667eea/ffffff?text=Pas+de+couverture"
   }
+
+  // AJOUTEZ cette méthode dans BooksService class
+searchExactTitle(title: string): Observable<Book[]> {
+  // Requête très stricte avec intitle et guillemets
+  const encodedTitle = encodeURIComponent(`"${title}"`);
+  const url = `${this.apiUrl}?q=intitle:${encodedTitle}&maxResults=1&printType=books&langRestrict=en`;
+  
+  return this.http.get<any>(url).pipe(
+    map((response) => {
+      if (!response.items || response.items.length === 0) {
+        return []; // Aucun résultat
+      }
+      
+      const volumeInfo = response.items[0].volumeInfo;
+      const itemTitle = volumeInfo.title?.toLowerCase() || '';
+      const searchLower = title.toLowerCase().trim();
+      
+      // Vérification stricte
+      const isExactMatch = itemTitle === searchLower || 
+                          itemTitle.startsWith(searchLower);
+      
+      if (!isExactMatch || 
+          !volumeInfo.imageLinks?.thumbnail || 
+          !volumeInfo.authors) {
+        return []; // Rejeter si pas assez similaire
+      }
+      
+      // Retourner UN SEUL livre
+      return [{
+        id: response.items[0].id,
+        title: volumeInfo.title,
+        author: volumeInfo.authors.join(", "),
+        cover: volumeInfo.imageLinks.thumbnail.replace("http:", "https:"),
+        rating: volumeInfo.averageRating || Math.random() * 1.5 + 3.5,
+        genre: volumeInfo.categories ? volumeInfo.categories[0] : "Général",
+        description: volumeInfo.description,
+        publishedDate: volumeInfo.publishedDate,
+      }];
+    })
+  );
+}
+
+// Ajoutez ces méthodes dans BooksService class après searchExactTitle()
+
+/**
+ * Recherche par auteur (recherche approximative)
+ */
+searchByAuthor(authorName: string): Observable<Book[]> {
+  const query = `inauthor:"${authorName}"`;
+  
+  const params = new HttpParams()
+    .set('q', query)
+    .set('langRestrict', 'fr')
+    .set('maxResults', '40')
+    .set('orderBy', 'relevance');
+
+  return this.http.get<any>(this.apiUrl, { params }).pipe(
+    map((response) => {
+      if (!response.items) {
+        return [];
+      }
+      
+      return response.items
+        .map((item: any) => this.mapToBook(item))
+        .filter((book: Book) => 
+          book.cover && 
+          !book.cover.includes('placeholder') &&
+          book.author.toLowerCase().includes(authorName.toLowerCase())
+        );
+    })
+  );
+}
+
+/**
+ * Recherche par genre (recherche approximative)
+ */
+searchByGenre(genreName: string): Observable<Book[]> {
+  const query = `subject:"${genreName}"`;
+  
+  const params = new HttpParams()
+    .set('q', query)
+    .set('langRestrict', 'fr')
+    .set('maxResults', '40')
+    .set('orderBy', 'relevance');
+
+  return this.http.get<any>(this.apiUrl, { params }).pipe(
+    map((response) => {
+      if (!response.items) {
+        return [];
+      }
+      
+      return response.items
+        .map((item: any) => this.mapToBook(item))
+        .filter((book: Book) => 
+          book.cover && 
+          !book.cover.includes('placeholder') &&
+          book.genre.toLowerCase().includes(genreName.toLowerCase())
+        );
+    })
+  );
+}
 }

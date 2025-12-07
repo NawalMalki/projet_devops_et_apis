@@ -10,65 +10,254 @@
     <main class="content">
       <!-- Section Hero -->
       <section class="hero-section">
-        <h1 class="hero-title">Content de te revoir, lecteur !</h1>
-        <p class="hero-subtitle">Découvre notre sélection de livres</p>
+        <!-- Mode normal (pas de recherche) -->
+        <div *ngIf="!isSearchActive">
+          <h1 class="hero-title">Content de te revoir, lecteur !</h1>
+          <p class="hero-subtitle">Découvre notre sélection de livres</p>
+        </div>
+        
+        <!-- Mode recherche -->
+        <div *ngIf="isSearchActive" class="search-mode">
+          <!-- Affichage selon le type de recherche -->
+          <ng-container [ngSwitch]="searchType">
+            <!-- Recherche par auteur -->
+            <div *ngSwitchCase="'author'">
+              <h1 class="hero-title">Livres de l'auteur "{{ searchQuery }}"</h1>
+              <p class="hero-subtitle">{{ allBooks.length }} livre(s) trouvé(s)</p>
+            </div>
+            
+            <!-- Recherche par genre -->
+            <div *ngSwitchCase="'genre'">
+              <h1 class="hero-title">Livres du genre "{{ searchQuery }}"</h1>
+              <p class="hero-subtitle">{{ allBooks.length }} livre(s) trouvé(s)</p>
+            </div>
+            
+            <!-- Recherche par titre (par défaut) -->
+            <div *ngSwitchDefault>
+              <h1 class="hero-title">Résultats pour "{{ searchQuery }}"</h1>
+              <p class="hero-subtitle" *ngIf="allBooks.length === 1">Correspondance exacte</p>
+            </div>
+          </ng-container>
+          
+          <div class="search-controls">
+            <button class="clear-search-btn" (click)="clearSearch()">
+              ✕ Nouvelle recherche
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="content-in">
         <!-- Indicateur de chargement -->
         <div *ngIf="isLoading" class="loading-section">
           <div class="loading-spinner"></div>
-          <p>Chargement des livres...</p>
+          <p *ngIf="!isSearchActive">Chargement des livres...</p>
+          <p *ngIf="isSearchActive && searchType === 'title'">Recherche du titre...</p>
+          <p *ngIf="isSearchActive && searchType === 'author'">Recherche de l'auteur...</p>
+          <p *ngIf="isSearchActive && searchType === 'genre'">Recherche du genre...</p>
         </div>
 
         <!-- Message d'erreur -->
         <div *ngIf="error && !isLoading" class="error-section">
           <p>{{ error }}</p>
-          <button class="retry-button" (click)="loadMixedBooks()">Réessayer</button>
+          <button 
+            class="retry-button" 
+            (click)="isSearchActive ? clearSearch() : loadMixedBooks()"
+          >
+            {{ isSearchActive ? 'Nouvelle recherche' : 'Réessayer' }}
+          </button>
         </div>
 
-        <!-- SECTION UNIQUE : Tous les livres -->
-        <section class="section" *ngIf="!isLoading && !error && allBooks.length > 0">
-          <div class="section-header">
-            <h2 class="section-title">
-              <span class="section-icon">📚</span>
-              Tous les livres
-            </h2>
-          </div>
-          
-          <div class="books-grid" style="grid-template-columns: repeat(5, 1fr);">
-            <div 
-              class="book-card" 
-              *ngFor="let book of allBooks" 
-              (click)="onBookClick(book)"
-            >
-              <div class="book-cover-wrapper">
-                <img 
-                  [src]="book.cover" 
-                  [alt]="book.title" 
-                  class="book-cover"
-                  loading="lazy"
-                  (error)="onImageError($event)"
-                />
-                <div class="book-overlay">
-                  <button class="overlay-button">Voir les détails</button>
+        <!-- MODE NORMAL : Tous les livres (pas de recherche) -->
+        <div *ngIf="!isSearchActive && !isLoading && !error">
+          <!-- SECTION UNIQUE : Tous les livres -->
+          <section class="section" *ngIf="allBooks.length > 0">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Tous les livres
+              </h2>
+            </div>
+            
+            <div class="books-grid">
+              <div 
+                class="book-card" 
+                *ngFor="let book of allBooks" 
+                (click)="onBookClick(book)"
+              >
+                <div class="book-cover-wrapper">
+                  <img 
+                    [src]="book.cover" 
+                    [alt]="book.title" 
+                    class="book-cover"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
+                  <div class="book-overlay">
+                    <button class="overlay-button">Voir les détails</button>
+                  </div>
+                </div>
+                <div class="book-info">
+                  <h3 class="book-title">{{ book.title }}</h3>
+                  <p class="book-author">{{ book.author }}</p>
+                  <div class="book-meta">
+                    <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
+                    <span class="book-genre">{{ book.genre }}</span>
+                  </div>
                 </div>
               </div>
-              <div class="book-info">
-                <h3 class="book-title">{{ book.title }}</h3>
-                <p class="book-author">{{ book.author }}</p>
-                <div class="book-meta">
-                  <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
-                  <span class="book-genre">{{ book.genre }}</span>
+            </div>
+          </section>
+
+          <!-- Aucun livre trouvé en mode normal -->
+          <div *ngIf="allBooks.length === 0" class="empty-state">
+            <p>Aucun livre disponible pour le moment.</p>
+          </div>
+        </div>
+
+        <!-- MODE RECHERCHE -->
+        <div *ngIf="isSearchActive && !isLoading && !error">
+          
+          <!-- AFFICHAGE UNIQUE : Recherche par titre avec un seul résultat -->
+          <div *ngIf="showSingleBookCard" class="single-book-section">
+            <div class="single-book-header">
+              <h2 class="section-title">
+                <span class="section-icon">🔍</span>
+                Livre trouvé
+                <span class="exact-match-badge">Correspondance exacte</span>
+              </h2>
+            </div>
+            
+            <div class="single-book-container">
+              <div 
+                class="single-book-card" 
+                (click)="onBookClick(allBooks[0])"
+              >
+                <div class="single-book-cover">
+                  <img 
+                    [src]="allBooks[0].cover" 
+                    [alt]="allBooks[0].title" 
+                    class="book-cover-large"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
+                </div>
+                <div class="single-book-details">
+                  <h3 class="single-book-title">{{ allBooks[0].title }}</h3>
+                  <p class="single-book-author">Par {{ allBooks[0].author }}</p>
+                  
+                  <div class="single-book-rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-value">{{ formatRating(allBooks[0].rating) }}/5</span>
+                  </div>
+                  
+                  <div class="single-book-genre">
+                    <strong>Genre:</strong> {{ allBooks[0].genre }}
+                  </div>
+                  
+                  <div class="single-book-description" *ngIf="allBooks[0].description">
+                    <p>{{ allBooks[0].description | slice:0:300 }}...</p>
+                  </div>
+                  
+                  <button 
+                    class="view-details-btn" 
+                    (click)="onBookClick(allBooks[0]); $event.stopPropagation()"
+                  >
+                    Voir tous les détails
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-
-        <!-- Aucun livre trouvé -->
-        <div *ngIf="!isLoading && !error && allBooks.length === 0" class="empty-state">
-          <p>Aucun livre disponible pour le moment.</p>
+          
+          <!-- AFFICHAGE GRID : Recherche par auteur ou genre, ou titre avec plusieurs résultats -->
+          <div *ngIf="showBooksGrid" class="search-results-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="section-icon" *ngIf="searchType === 'author'">👤</span>
+                <span class="section-icon" *ngIf="searchType === 'genre'">📚</span>
+                <span class="section-icon" *ngIf="searchType === 'title'">🔍</span>
+                {{ allBooks.length }} livre(s) trouvé(s)
+                <span class="search-type-badge" *ngIf="searchTypeFormatted">
+                  {{ searchTypeFormatted }}
+                </span>
+              </h2>
+              
+              <div class="search-info" *ngIf="searchType === 'author' || searchType === 'genre'">
+                <p class="search-query-display">
+                  {{ searchType === 'author' ? 'Auteur' : 'Genre' }} : <strong>"{{ searchQuery }}"</strong>
+                </p>
+              </div>
+            </div>
+            
+            <div class="books-grid">
+              <div 
+                class="book-card" 
+                *ngFor="let book of allBooks" 
+                (click)="onBookClick(book)"
+              >
+                <div class="book-cover-wrapper">
+                  <img 
+                    [src]="book.cover" 
+                    [alt]="book.title" 
+                    class="book-cover"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
+                  <div class="book-overlay">
+                    <button class="overlay-button">Voir les détails</button>
+                  </div>
+                </div>
+                <div class="book-info">
+                  <h3 class="book-title">{{ book.title }}</h3>
+                  <p class="book-author">{{ book.author }}</p>
+                  <div class="book-meta">
+                    <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
+                    <span class="book-genre">{{ book.genre }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Aucun livre trouvé en mode recherche -->
+          <div *ngIf="allBooks.length === 0" class="no-search-results">
+            <div class="no-results-content">
+              <ng-container [ngSwitch]="searchType">
+                <div *ngSwitchCase="'author'">
+                  <h3>Aucun livre trouvé pour l'auteur "{{ searchQuery }}"</h3>
+                  <p>Essayez avec un nom d'auteur différent ou vérifiez l'orthographe.</p>
+                  <p class="search-tips">
+                    <strong>Astuce:</strong> Commencez votre recherche par "par " pour chercher un auteur.<br>
+                    Exemple: <em>par Victor Hugo</em>
+                  </p>
+                </div>
+                
+                <div *ngSwitchCase="'genre'">
+                  <h3>Aucun livre trouvé pour le genre "{{ searchQuery }}"</h3>
+                  <p>Essayez avec un nom de genre différent ou vérifiez l'orthographe.</p>
+                  <p class="search-tips">
+                    <strong>Astuce:</strong> Commencez votre recherche par "genre " pour chercher un genre.<br>
+                    Exemple: <em>genre Science-Fiction</em>
+                  </p>
+                </div>
+                
+                <div *ngSwitchDefault>
+                  <h3>Aucun livre trouvé pour "{{ searchQuery }}"</h3>
+                  <p>Essayez avec un titre différent ou vérifiez l'orthographe.</p>
+                  <p class="search-tips">
+                    <strong>Astuces de recherche:</strong><br>
+                    • Pour chercher un auteur: commencez par "par " (ex: <em>par J.K. Rowling</em>)<br>
+                    • Pour chercher un genre: commencez par "genre " (ex: <em>genre Fantaisie</em>)
+                  </p>
+                </div>
+              </ng-container>
+              
+              <button class="retry-button" (click)="clearSearch()">
+                Retour à l'accueil
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </main>

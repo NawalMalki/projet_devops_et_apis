@@ -21,6 +21,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoading = false
   error: string | null = null
   currentGenre: string | null = null
+  isSearchActive = false;
+  searchQuery: string = "";
+  searchType: string = ""; // 'title', 'author', 'genre'
   
   private queryParamsSubscription?: Subscription
 
@@ -33,12 +36,37 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       const genre = params['genre']
+      const search = params['search']
+      const type = params['type'] || 'title' // Nouveau: type de recherche
       
-      if (genre) {
+      if (search) {
+        this.searchQuery = search
+        this.currentGenre = null
+        this.isSearchActive = true
+        this.searchType = type
+        
+        // Déterminer le type de recherche
+        if (type === 'author') {
+          this.performAuthorSearch(search)
+        } else if (type === 'genre') {
+          this.performGenreSearch(search)
+        } else {
+          // Par défaut : recherche par titre
+          this.performExactSearch(search)
+        }
+      } else if (genre) {
+        // Chargement par genre
+        this.searchQuery = ""
         this.currentGenre = genre
+        this.isSearchActive = false
+        this.searchType = ""
         this.loadBooksByGenre(genre)
       } else {
+        // Accueil normal
+        this.searchQuery = ""
         this.currentGenre = null
+        this.isSearchActive = false
+        this.searchType = ""
         this.loadMixedBooks()
       }
     })
@@ -119,6 +147,115 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Recherche exacte par titre
+   */
+  performExactSearch(query: string) {
+    this.isLoading = true
+    this.error = null
+    this.allBooks = []
+    this.isSearchActive = true
+    this.searchQuery = query
+    this.searchType = 'title'
+    
+    console.log(`🔍 Recherche par TITRE pour: "${query}"`);
+    
+    this.booksService.searchExactTitle(query).subscribe({
+      next: (books) => {
+        this.allBooks = books
+        this.isLoading = false
+        
+        if (books.length === 0) {
+          this.error = `Aucun livre trouvé pour "${query}"`
+        } else {
+          console.log(`✅ ${books.length} livre(s) trouvé(s) pour "${query}"`);
+        }
+      },
+      error: (error) => {
+        console.error(`Erreur recherche "${query}":`, error)
+        this.error = `Erreur lors de la recherche pour "${query}".`
+        this.isLoading = false
+        this.allBooks = []
+      },
+    })
+  }
+
+  /**
+   * Recherche par auteur
+   */
+  performAuthorSearch(authorName: string) {
+    this.isLoading = true
+    this.error = null
+    this.allBooks = []
+    this.isSearchActive = true
+    this.searchQuery = authorName
+    this.searchType = 'author'
+    
+    console.log(`🔍 Recherche par AUTEUR pour: "${authorName}"`);
+    
+    this.booksService.searchByAuthor(authorName).subscribe({
+      next: (books) => {
+        this.allBooks = books
+        this.isLoading = false
+        
+        if (books.length === 0) {
+          this.error = `Aucun livre trouvé pour l'auteur "${authorName}"`
+        } else {
+          console.log(`✅ ${books.length} livre(s) trouvé(s) pour l'auteur "${authorName}"`);
+        }
+      },
+      error: (error) => {
+        console.error(`Erreur recherche auteur "${authorName}":`, error)
+        this.error = `Erreur lors de la recherche pour l'auteur "${authorName}".`
+        this.isLoading = false
+        this.allBooks = []
+      },
+    })
+  }
+
+  /**
+   * Recherche par genre
+   */
+  performGenreSearch(genreName: string) {
+    this.isLoading = true
+    this.error = null
+    this.allBooks = []
+    this.isSearchActive = true
+    this.searchQuery = genreName
+    this.searchType = 'genre'
+    
+    console.log(`🔍 Recherche par GENRE pour: "${genreName}"`);
+    
+    this.booksService.searchByGenre(genreName).subscribe({
+      next: (books) => {
+        this.allBooks = books
+        this.isLoading = false
+        
+        if (books.length === 0) {
+          this.error = `Aucun livre trouvé pour le genre "${genreName}"`
+        } else {
+          console.log(`✅ ${books.length} livre(s) trouvé(s) pour le genre "${genreName}"`);
+        }
+      },
+      error: (error) => {
+        console.error(`Erreur recherche genre "${genreName}":`, error)
+        this.error = `Erreur lors de la recherche pour le genre "${genreName}".`
+        this.isLoading = false
+        this.allBooks = []
+      },
+    })
+  }
+
+  /**
+   * Effacer la recherche
+   */
+  clearSearch() {
+    this.searchQuery = ""
+    this.isSearchActive = false
+    this.searchType = ""
+    this.router.navigate(['/home'])
+  }
+
+  /**
    * Formate le nom du genre pour l'affichage
    */
   formatGenreName(genre: string): string {
@@ -129,9 +266,22 @@ export class HomeComponent implements OnInit, OnDestroy {
       'thriller': 'Thriller',
       'fantasy': 'Fantaisie',
       'adventure': 'Aventure',
-      'mystery': 'Mystère'
+      'mystery': 'Mystère',
+      'biography': 'Biographie',
+      'history': 'Histoire',
+      'science': 'Science',
+      'poetry': 'Poésie',
+      'drama': 'Drame',
+      'comedy': 'Comédie'
     }
-    return genreMap[genre.toLowerCase()] || genre
+    return genreMap[genre.toLowerCase()] || this.capitalizeFirstLetter(genre)
+  }
+
+  /**
+   * Capitalise la première lettre
+   */
+  private capitalizeFirstLetter(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
   }
 
   /**
@@ -175,5 +325,37 @@ export class HomeComponent implements OnInit, OnDestroy {
    */
   get currentGenreFormatted(): string {
     return this.currentGenre ? this.formatGenreName(this.currentGenre) : ''
+  }
+
+  /**
+   * Obtient le nom du type de recherche formaté
+   */
+  get searchTypeFormatted(): string {
+    switch(this.searchType) {
+      case 'author': return 'Auteur';
+      case 'genre': return 'Genre';
+      case 'title': return 'Titre';
+      default: return '';
+    }
+  }
+
+  /**
+   * Vérifie si on affiche une seule carte de livre (recherche par titre avec un seul résultat)
+   */
+  get showSingleBookCard(): boolean {
+    return this.isSearchActive && 
+           this.searchType === 'title' && 
+           this.allBooks.length === 1
+  }
+
+  /**
+   * Vérifie si on affiche une grille de livres (recherche multiple)
+   */
+  get showBooksGrid(): boolean {
+    return (!this.isSearchActive && this.allBooks.length > 0) ||
+           (this.isSearchActive && 
+            (this.searchType === 'author' || this.searchType === 'genre') && 
+            this.allBooks.length > 0) ||
+           (this.isSearchActive && this.searchType === 'title' && this.allBooks.length > 1)
   }
 }

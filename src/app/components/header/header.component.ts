@@ -85,13 +85,37 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.toggleSidebar.emit();
   }
 
-  onSearch() {
-    if (this.searchQuery.trim()) {
-      this.router.navigate(["/search"], {
-        queryParams: { q: this.searchQuery.trim() },
-      });
+
+// REMPLACEZ la méthode onSearch() par ceci :
+onSearch() {
+  if (this.searchQuery.trim()) {
+    // Détecter si c'est une recherche par auteur ou genre
+    const query = this.searchQuery.trim();
+    
+    // Pattern pour détecter "par Auteur" ou "genre Genre"
+    const authorMatch = query.match(/par\s+(.+)/i);
+    const genreMatch = query.match(/genre\s+(.+)/i);
+    
+    let searchType = 'titre'; // par défaut
+    let searchTerm = query;
+    
+    if (authorMatch) {
+      searchType = 'auteur';
+      searchTerm = authorMatch[1].trim();
+    } else if (genreMatch) {
+      searchType = 'genre';
+      searchTerm = genreMatch[1].trim();
     }
+    
+    // Naviguer vers home avec la recherche et son type
+    this.router.navigate(['/home'], {
+      queryParams: { 
+        search: searchTerm,
+        type: searchType 
+      },
+    });
   }
+}
 
   onSearchKeyPress(event: KeyboardEvent) {
     if (event.key === "Enter") {
