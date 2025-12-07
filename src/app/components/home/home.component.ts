@@ -1,9 +1,10 @@
-import { Component, OnInit } from "@angular/core"
+import { Component, OnInit, OnDestroy } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { Router, ActivatedRoute } from "@angular/router"
 import { SidebarComponent } from "../sidebar/sidebar.component"
 import { HeaderComponent } from "../header/header.component"
 import { BooksService, Book } from "../../services/books.service"
+import { Subscription } from "rxjs"
 
 @Component({
   selector: "app-home",
@@ -12,70 +13,132 @@ import { BooksService, Book } from "../../services/books.service"
   imports: [CommonModule, SidebarComponent, HeaderComponent],
   styleUrls: ["./home.component.css"],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   sidebarOpen = false
-  books: Book[] = []
+  
+  allBooks: Book[] = []
+  
   isLoading = false
   error: string | null = null
+  currentGenre: string | null = null
+  
+  private queryParamsSubscription?: Subscription
 
   constructor(
     private booksService: BooksService,
     private router: Router,
-    private route: ActivatedRoute  // ✅ AJOUTÉ pour écouter les queryParams
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    // ✅ NOUVEAU : Écouter les changements de genre depuis la sidebar
-    this.route.queryParams.subscribe(params => {
+    this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       const genre = params['genre']
       
       if (genre) {
-        // Si un genre est sélectionné, charger les livres de ce genre
+        this.currentGenre = genre
         this.loadBooksByGenre(genre)
       } else {
-        // Sinon, charger tous les livres
-        this.loadBooks()
+        this.currentGenre = null
+        this.loadMixedBooks()
       }
     })
   }
+  
+  ngOnDestroy() {
+    if (this.queryParamsSubscription) {
+      this.queryParamsSubscription.unsubscribe()
+    }
+  }
 
-  loadBooks() {
+  /**
+   * Charge un cocktail de livres de différents genres
+   */
+  loadMixedBooks() {
     this.isLoading = true
     this.error = null
+    this.allBooks = []
     
-    this.booksService.getBooks("fiction", 40).subscribe({
+    this.booksService.getMixedBooks(40).subscribe({
       next: (books) => {
-        this.books = books
+        this.allBooks = books.filter(book => 
+          book.cover && 
+          !book.cover.includes('placeholder') &&
+          book.title &&
+          book.author
+        )
         this.isLoading = false
+        
+        console.log('📚 Livres mélangés chargés:', this.allBooks.length)
+        
+        if (this.allBooks.length === 0) {
+          this.error = "Aucun livre trouvé. Veuillez réessayer."
+        }
       },
       error: (error) => {
-        console.error("Erreur lors du chargement des livres:", error)
+        console.error("❌ Erreur lors du chargement des livres:", error)
         this.error = "Impossible de charger les livres. Veuillez réessayer."
         this.isLoading = false
+        this.allBooks = []
       },
     })
   }
 
-  // ✅ NOUVELLE MÉTHODE pour charger par genre
+  /**
+   * Charge les livres d'un genre spécifique
+   */
   loadBooksByGenre(genre: string) {
     this.isLoading = true
     this.error = null
+    this.allBooks = []
+    
+    console.log('🔍 Chargement du genre:', genre)
     
     this.booksService.getBooksByGenre(genre, 40).subscribe({
       next: (books) => {
-        this.books = books
+        this.allBooks = books.filter(book => 
+          book.cover && 
+          !book.cover.includes('placeholder') &&
+          book.title &&
+          book.author
+        )
         this.isLoading = false
         
-        if (books.length === 0) {
-          this.error = `Aucun livre trouvé pour "${genre}"`
+        console.log(`📚 Livres "${genre}" chargés:`, this.allBooks.length)
+        
+        if (this.allBooks.length === 0) {
+          this.error = `Aucun livre trouvé pour "${this.formatGenreName(genre)}"`
         }
       },
       error: (error) => {
-        console.error(`Erreur genre ${genre}:`, error)
-        this.error = `Impossible de charger "${genre}".`
+        console.error(`❌ Erreur genre ${genre}:`, error)
+        this.error = `Impossible de charger les livres "${this.formatGenreName(genre)}".`
         this.isLoading = false
+        this.allBooks = []
       },
     })
+  }
+
+  /**
+   * Formate le nom du genre pour l'affichage
+   */
+  formatGenreName(genre: string): string {
+    const genreMap: { [key: string]: string } = {
+      'fiction': 'Fiction',
+      'romance': 'Romance',
+      'science fiction': 'Science-Fiction',
+      'thriller': 'Thriller',
+      'fantasy': 'Fantaisie',
+      'adventure': 'Aventure',
+      'mystery': 'Mystère'
+    }
+    return genreMap[genre.toLowerCase()] || genre
+  }
+
+  /**
+   * Retour à l'accueil (tous les livres)
+   */
+  resetToAllBooks() {
+    this.router.navigate(['/home'])
   }
 
   toggleSidebar() {
@@ -88,5 +151,29 @@ export class HomeComponent implements OnInit {
 
   formatRating(rating: number): string {
     return rating.toFixed(1)
+  }
+
+  formatDate(date?: string): string {
+    if (!date) return 'Date inconnue'
+    const year = date.split('-')[0]
+    return year
+  }
+
+  onImageError(event: any) {
+    event.target.src = 'https://via.placeholder.com/128x192/667eea/ffffff?text=Pas+de+couverture'
+  }
+
+  /**
+   * Vérifie si un filtre de genre est actif
+   */
+  get hasGenreFilter(): boolean {
+    return this.currentGenre !== null
+  }
+
+  /**
+   * Obtient le nom du genre actuel formaté
+   */
+  get currentGenreFormatted(): string {
+    return this.currentGenre ? this.formatGenreName(this.currentGenre) : ''
   }
 }

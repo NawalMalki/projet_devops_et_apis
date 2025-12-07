@@ -44,6 +44,25 @@ export class FinishedComponent implements OnInit {
     })
   }
 
+  /**
+   * Retire un livre de la liste des terminés
+   */
+  removeFromFinished(event: Event, book: UserBook) {
+    event.stopPropagation() // Empêche la navigation vers la page du livre
+    
+    this.libraryService.removeFromFinished(book.id).subscribe({
+      next: () => {
+        // Retire le livre de la liste locale
+        this.books = this.books.filter(b => b.id !== book.id)
+        console.log('✅ Livre retiré des terminés')
+      },
+      error: (error) => {
+        console.error('❌ Erreur:', error)
+        alert('Erreur lors de la suppression')
+      }
+    })
+  }
+
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen
   }

@@ -274,6 +274,75 @@ export class LibraryService {
       )
     );
   }
+  // ---------------------------
+// REMOVE FROM ALL COLLECTIONS (Suppression complète)
+// ---------------------------
+removeFromAllCollections(bookId: string): Observable<void> {
+  const userId = this.getCurrentUserId();
+  if (!userId) throw new Error("Utilisateur non connecté");
+
+  // Crée les requêtes pour toutes les collections
+  const queries = [
+    query(
+      collection(this.firestore, "en_cours_de_lecture"),
+      where("userId", "==", userId),
+      where("id", "==", bookId)
+    ),
+    query(
+      collection(this.firestore, "termines"),
+      where("userId", "==", userId),
+      where("id", "==", bookId)
+    ),
+    query(
+      collection(this.firestore, "favoris"),
+      where("userId", "==", userId),
+      where("id", "==", bookId)
+    ),
+  ];
+
+  // Récupère et supprime tous les documents trouvés
+  return from(
+    Promise.all(queries.map((q) => getDocs(q))).then((snapshots) => {
+      const deletePromises: Promise<void>[] = [];
+
+      snapshots.forEach((snapshot, index) => {
+        const collectionNames = ["en_cours_de_lecture", "termines", "favoris"];
+        snapshot.docs.forEach((docSnapshot) => {
+          deletePromises.push(
+            deleteDoc(
+              doc(this.firestore, collectionNames[index], docSnapshot.id)
+            )
+          );
+        });
+      });
+
+      return Promise.all(deletePromises).then(() => {});
+    })
+  );
+}
+
+// ---------------------------
+// REMOVE FROM FINISHED (pour la page "Terminé")
+// ---------------------------
+removeFromFinished(bookId: string): Observable<void> {
+  const userId = this.getCurrentUserId();
+  if (!userId) throw new Error("Utilisateur non connecté");
+
+  const q = query(
+    collection(this.firestore, "termines"),
+    where("userId", "==", userId),
+    where("id", "==", bookId)
+  );
+
+  return from(
+    getDocs(q).then((snapshot) => {
+      const toDelete = snapshot.docs.map((d) =>
+        deleteDoc(doc(this.firestore, "termines", d.id))
+      );
+      return Promise.all(toDelete).then(() => {});
+    })
+  );
+}
 
   // ---------------------------
   // GET FULL LIBRARY

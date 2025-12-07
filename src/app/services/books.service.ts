@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
-import { HttpClient } from "@angular/common/http"
-import { Observable, map, of } from "rxjs"
+import { HttpClient, HttpParams } from "@angular/common/http"
+import { Observable, map, of, forkJoin } from "rxjs"
 
 export interface Book {
   id: string
@@ -11,11 +11,15 @@ export interface Book {
   genre: string
   description?: string
   publishedDate?: string
+  pageCount?: number
+  language?: string
 }
 
 export interface Genre {
   name: string
   count: number
+  icon: string
+  query: string
 }
 
 @Injectable({
@@ -23,146 +27,286 @@ export interface Genre {
 })
 export class BooksService {
   private apiUrl = "https://www.googleapis.com/books/v1/volumes"
+  private apiKey = "AIzaSyB4av8y41-vDN6Juac7Ftwz916DNcW6dJQ"
   private genresCache: Genre[] | null = null
 
   constructor(private http: HttpClient) {}
 
-  // Recherche de livres avec filtres AMÉLIORÉS
-  getBooks(query = "fiction", maxResults = 40): Observable<Book[]> {
-    // Augmenté maxResults pour avoir PLUS de livres
-    // filter=ebooks pour de vrais livres (pas d'articles scientifiques)
-    const url = `${this.apiUrl}?q=${query}&maxResults=${maxResults}&printType=books&orderBy=relevance&langRestrict=fr&filter=ebooks`
+  /**
+   * Récupère un cocktail de livres de différents genres
+   */
+  getMixedBooks(maxResults = 40): Observable<Book[]> {
+    const genres = ['fiction', 'romance', 'adventure', 'mystery', 'thriller', 'fantasy']
+    
+    const selectedGenres = genres.sort(() => 0.5 - Math.random()).slice(0, 3)
+    
+    const requests = selectedGenres.map(genre => {
+      const query = `subject:${genre} language:fr`
+      
+      const params = new HttpParams()
+        .set('q', query)
+        .set('orderBy', 'relevance')
+        .set('maxResults', Math.floor(40 / 3).toString())
+        .set('key', this.apiKey)
+      
+      return this.http.get<any>(this.apiUrl, { params })
+    })
+    
+    return forkJoin(requests).pipe(
+      map((responses) => {
+        const allBooks: Book[] = []
+        
+        responses.forEach(response => {
+          if (response.items) {
+            const books = response.items
+              .map((item: any) => this.mapToBook(item))
+              .filter((book: Book) => book.cover && !book.cover.includes('placeholder'))
+            
+            allBooks.push(...books)
+          }
+        })
+        
+        return allBooks.sort(() => 0.5 - Math.random())
+      })
+    )
+  }
 
-    return this.http.get<any>(url).pipe(
+  getFrenchLiteratureBooks(maxResults = 40): Observable<Book[]> {
+    const query = 'subject:fiction language:fr'
+    
+    const params = new HttpParams()
+      .set('q', query)
+      .set('orderBy', 'newest')
+      .set('maxResults', maxResults.toString())
+      .set('key', this.apiKey)
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
       map((response) => {
-        if (!response.items) return []
+        if (!response.items) {
+          return []
+        }
 
         return response.items
-          .filter((item: any) => {
-            const volumeInfo = item.volumeInfo
-            // Filtrer les trucs moches (articles scientifiques, etc.)
-            return (
-              volumeInfo.imageLinks?.thumbnail && // Doit avoir une couverture
-              volumeInfo.authors && // Doit avoir un auteur
-              volumeInfo.description && // Doit avoir une description
-              volumeInfo.categories && // Doit avoir des catégories
-              volumeInfo.pageCount > 50 && // Au moins 50 pages
-              !volumeInfo.title.toLowerCase().includes("journal") &&
-              !volumeInfo.title.toLowerCase().includes("article") &&
-              !volumeInfo.title.toLowerCase().includes("proceedings")
-            )
+          .map((item: any) => this.mapToBook(item))
+          .filter((book: Book) => {
+            const hasGoodCover = book.cover && !book.cover.includes('placeholder')
+            const hasDate = book.publishedDate
+            const isRecent = hasDate ? parseInt(book.publishedDate!.split('-')[0]) >= 1990 : true
+            
+            return hasGoodCover && isRecent
           })
-          .map((item: any) => {
-            const volumeInfo = item.volumeInfo
-            return {
-              id: item.id,
-              title: volumeInfo.title,
-              author: volumeInfo.authors.join(", "),
-              cover: volumeInfo.imageLinks.thumbnail.replace("http:", "https:"), // ✅ HTTPS
-              rating: volumeInfo.averageRating || Math.random() * 1.5 + 3.5,
-              genre: volumeInfo.categories[0],
-              description: volumeInfo.description,
-              publishedDate: volumeInfo.publishedDate,
-            }
+          .sort((a: { publishedDate: any }, b: { publishedDate: any }) => {
+            const dateA = new Date(a.publishedDate || '2000').getTime()
+            const dateB = new Date(b.publishedDate || '2000').getTime()
+            return dateB - dateA
           })
       }),
     )
   }
 
-  // Recherche par genre avec de VRAIS livres populaires
-  getBooksByGenre(genre: string, maxResults = 40): Observable<Book[]> {
-    // Query simple et efficace par genre
-    const query = `subject:${genre.toLowerCase()}`
-    return this.getBooks(query, maxResults)
-  }
-
-  // Recherche de livres populaires (bestsellers)
-  getPopularBooks(maxResults = 15): Observable<Book[]> {
-    // Requêtes populaires selon la doc
-    const queries = [
-      'bestseller',
-      'best seller fiction',
-      'popular books',
-      'award winning books'
-    ]
-
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)]
-    return this.getBooks(randomQuery, maxResults)
-  }
-
-  // Récupérer un livre par ID
-  getBookById(id: string): Observable<Book> {
-    const url = `${this.apiUrl}/${id}`
-    return this.http.get<any>(url).pipe(
-      map((item) => {
-        const volumeInfo = item.volumeInfo
-        return {
-          id: item.id,
-          title: volumeInfo.title || "Titre non disponible",
-          author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "Auteur inconnu",
-          cover: volumeInfo.imageLinks
-            ? volumeInfo.imageLinks.thumbnail.replace("http:", "https:")
-            : this.getDefaultCover(),
-          rating: volumeInfo.averageRating || Math.random() * 2 + 3,
-          genre: volumeInfo.categories ? volumeInfo.categories[0] : "Général",
-          description: volumeInfo.description,
-          publishedDate: volumeInfo.publishedDate,
+  getFrenchBestsellers(maxResults = 20): Observable<Book[]> {
+    const query = 'subject:fiction language:fr'
+    
+    const params = new HttpParams()
+      .set('q', query)
+      .set('orderBy', 'newest')
+      .set('maxResults', maxResults.toString())
+      .set('key', this.apiKey)
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      map((response) => {
+        if (!response.items) {
+          return []
         }
+        return response.items
+          .map((item: any) => this.mapToBook(item))
+          .filter((book: Book) => 
+            book.cover && 
+            !book.cover.includes('placeholder')
+          )
       }),
     )
   }
 
-  // Récupérer les genres disponibles DEPUIS L'API
+  getFrenchClassics(maxResults = 20): Observable<Book[]> {
+    const query = 'subject:adventure language:fr'
+    
+    const params = new HttpParams()
+      .set('q', query)
+      .set('orderBy', 'newest')
+      .set('maxResults', maxResults.toString())
+      .set('key', this.apiKey)
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      map((response) => {
+        if (!response.items) {
+          return []
+        }
+        return response.items
+          .map((item: any) => this.mapToBook(item))
+          .filter((book: Book) => 
+            book.cover && 
+            !book.cover.includes('placeholder')
+          )
+      }),
+    )
+  }
+
+  getBooks(query = "fiction", maxResults = 12): Observable<Book[]> {
+    const params = new HttpParams()
+      .set('q', query)
+      .set('maxResults', Math.min(maxResults, 40).toString())
+      .set('key', this.apiKey)
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      map((response) => {
+        if (!response.items) {
+          return []
+        }
+        return response.items.map((item: any) => this.mapToBook(item))
+      }),
+    )
+  }
+
+  /**
+   * Récupère les livres d'un genre spécifique
+   */
+  getBooksByGenre(genre: string, maxResults = 40): Observable<Book[]> {
+    const genreQueries: { [key: string]: string } = {
+      'fiction': 'subject:fiction language:fr',
+      'romance': 'subject:romance language:fr',
+      'science fiction': 'subject:science fiction language:fr',
+      'thriller': 'subject:thriller language:fr',
+      'fantasy': 'subject:fantasy language:fr',
+      'adventure': 'subject:adventure language:fr',
+      'mystery': 'subject:mystery language:fr'
+    }
+    
+    const query = genreQueries[genre.toLowerCase()] || `subject:${genre} language:fr`
+    
+    console.log('🔍 Requête API pour genre unique:', query)
+    
+    const params = new HttpParams()
+      .set('q', query)
+      .set('orderBy', 'relevance')
+      .set('maxResults', Math.min(maxResults, 40).toString())
+      .set('key', this.apiKey)
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      map((response) => {
+        if (!response.items) {
+          console.warn('⚠️ Aucun résultat pour:', query)
+          return []
+        }
+        
+        console.log(`✅ Résultats trouvés pour ${genre}:`, response.items.length)
+        
+        return response.items
+          .map((item: any) => this.mapToBook(item))
+          .filter((book: Book) => 
+            book.cover && 
+            !book.cover.includes('placeholder') &&
+            book.title &&
+            book.author
+          )
+      })
+    )
+  }
+
+  /**
+   * Compte le nombre de livres par genre
+   */
+  getGenreCount(genre: string): Observable<number> {
+    return this.getBooksByGenre(genre, 40).pipe(
+      map(books => books.length)
+    )
+  }
+
+  getBookById(id: string): Observable<Book> {
+    return this.http.get<any>(`${this.apiUrl}/${id}?key=${this.apiKey}`).pipe(
+      map((item) => this.mapToBook(item))
+    )
+  }
+
   getGenres(): Observable<Genre[]> {
     if (this.genresCache) {
       return of(this.genresCache)
     }
 
-    // Récupérer BEAUCOUP plus de livres pour avoir tous les genres
-    // On fait plusieurs requêtes en parallèle pour diversifier
-    const queries = [
-      "fiction",
-      "thriller",
-      "fantasy",
-      "romance",
-      "mystery",
-      "adventure",
-      "science fiction",
-      "historical"
-    ]
+    return this.getFrenchLiteratureBooks(40).pipe(
+      map((books) => {
+        const genreMap: { [key: string]: number } = {}
 
-    // Faire plusieurs appels en parallèle
-    const requests = queries.map(query => this.getBooks(query, 40))
-    
-    return new Observable<Genre[]>(observer => {
-      Promise.all(requests.map(req => req.toPromise()))
-        .then(results => {
-          const allBooks = results.flat().filter(book => book !== undefined)
-          const genreMap: { [key: string]: number } = {}
-
-          allBooks.forEach((book) => {
-            const genre = book.genre || "Général"
-            genreMap[genre] = (genreMap[genre] || 0) + 1
-          })
-
-          const genres: Genre[] = Object.keys(genreMap)
-            .map((name) => ({
-              name,
-              count: genreMap[name],
-            }))
-            .sort((a, b) => b.count - a.count) // Trier par popularité
-            .slice(0, 15) // Top 15 genres seulement
-
-          this.genresCache = genres
-          observer.next(genres)
-          observer.complete()
+        books.forEach((book) => {
+          const genre = book.genre || "Général"
+          if (genreMap[genre]) {
+            genreMap[genre]++
+          } else {
+            genreMap[genre] = 1
+          }
         })
-        .catch(error => observer.error(error))
-    })
+
+        const genres: Genre[] = Object.keys(genreMap).map((name) => ({
+          name,
+          count: genreMap[name],
+          icon: '📚',
+          query: name.toLowerCase()
+        }))
+
+        this.genresCache = genres
+        return genres
+      })
+    )
   }
 
-  // Image par défaut
+  private mapToBook(item: any): Book {
+    const volumeInfo = item.volumeInfo || {}
+    
+    let coverUrl = this.getDefaultCover()
+    
+    if (volumeInfo.imageLinks) {
+      if (volumeInfo.imageLinks.extraLarge) {
+        coverUrl = volumeInfo.imageLinks.extraLarge
+      } else if (volumeInfo.imageLinks.large) {
+        coverUrl = volumeInfo.imageLinks.large
+      } else if (volumeInfo.imageLinks.medium) {
+        coverUrl = volumeInfo.imageLinks.medium
+      } else if (volumeInfo.imageLinks.thumbnail) {
+        coverUrl = volumeInfo.imageLinks.thumbnail
+      } else if (volumeInfo.imageLinks.smallThumbnail) {
+        coverUrl = volumeInfo.imageLinks.smallThumbnail
+      }
+      
+      coverUrl = coverUrl
+        .replace('http:', 'https:')
+        .replace('&edge=curl', '')
+        .replace('zoom=1', 'zoom=0')
+        .replace('zoom=5', 'zoom=0')
+      
+      if (item.id) {
+        coverUrl = `https://books.google.com/books/publisher/content/images/frontcover/${item.id}?fife=w400-h600&source=gbs_api`
+      }
+    }
+    
+    return {
+      id: item.id,
+      title: volumeInfo.title || "Titre non disponible",
+      author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "Auteur inconnu",
+      cover: coverUrl,
+      rating: volumeInfo.averageRating || this.generateRealisticRating(),
+      genre: volumeInfo.categories ? volumeInfo.categories[0] : "Général",
+      description: volumeInfo.description,
+      publishedDate: volumeInfo.publishedDate,
+      pageCount: volumeInfo.pageCount,
+      language: volumeInfo.language
+    }
+  }
+
+  private generateRealisticRating(): number {
+    return Math.round((Math.random() * 1.3 + 3.5) * 10) / 10
+  }
+
   private getDefaultCover(): string {
-    return "https://via.placeholder.com/150x200/667eea/ffffff?text=📚"
+    return "https://via.placeholder.com/128x192/667eea/ffffff?text=Pas+de+couverture"
   }
 }

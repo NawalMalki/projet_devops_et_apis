@@ -1,5 +1,5 @@
 <aside class="sidebar playfair-display-font" [class.sidebar-closed]="!isOpen">
- <button (click)="closeSidebar()" class="close-btn">×</button>
+  <button (click)="closeSidebar()" class="close-btn">×</button>
   <nav class="sidebar-nav">
     <div class="nav-section">
       <h3 class="nav-section-title">Menu</h3>
@@ -11,28 +11,28 @@
             [class.nav-item-active]="item.active"
             (click)="onMenuItemClick(item)"
           >
-            
             <span class="nav-label">{{ item.label }}</span>
           </a>
         </li>
       </ul>
     </div>
 
-    <!-- Dynamic categories from Google Books API -->
+    <!-- Fixed categories with counts -->
     <div class="nav-section">
       <h3 class="nav-section-title">Catégories</h3>
       
-      <div *ngIf="isLoadingGenres" class="loading-genres">
+      <div *ngIf="isLoadingCounts" class="loading-counts">
         <p>Chargement...</p>
       </div>
 
-      <ul class="nav-list" *ngIf="!isLoadingGenres">
+      <ul class="nav-list" *ngIf="!isLoadingCounts">
         <li *ngFor="let category of categories">
           <a 
             href="#" 
-            class="nav-item"
+            class="nav-item category-item"
             (click)="onGenreClick(category, $event)"
           >
+            <span class="category-icon">{{ category.icon }}</span>
             <span class="nav-label">{{ category.name }}</span>
             <span class="nav-count">{{ category.count }}</span>
           </a>
