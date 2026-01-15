@@ -4,6 +4,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../AuthService/auth.service';
 
+// 🔥 AJOUT
+import { Firestore, doc, setDoc } from '@angular/fire/firestore';
+
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
@@ -22,7 +25,8 @@ export class SignUpComponent implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private firestore: Firestore // 🔥 AJOUT
   ) {
     this.signUpForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(3)]],
@@ -56,7 +60,7 @@ export class SignUpComponent implements OnDestroy {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  // Inscription avec email et mot de passe
+  // ✅ INSCRIPTION + CRÉATION USER FIRESTORE
   async onSubmit() {
     if (this.signUpForm.valid && !this.loading) {
       this.loading = true;
@@ -66,6 +70,15 @@ export class SignUpComponent implements OnDestroy {
       try {
         const { fullName, email, password } = this.signUpForm.value;
         const user = await this.authService.signUpWithEmail(email, password, fullName);
+
+        // 🔥 AJOUT CRUCIAL : sauvegarde Firestore
+        await setDoc(doc(this.firestore, 'users', user.uid), {
+          uid: user.uid,
+          displayName: fullName,
+          email: user.email,
+          photoURL: user.photoURL || null,
+          createdAt: new Date()
+        });
 
         this.successMessage = 'Inscription réussie ! Bienvenue ' + fullName;
         setTimeout(() => {
@@ -79,7 +92,6 @@ export class SignUpComponent implements OnDestroy {
     }
   }
 
-  // Connexion avec Google
   async signInWithGoogle() {
     if (!this.loading) {
       this.loading = true;
@@ -88,10 +100,18 @@ export class SignUpComponent implements OnDestroy {
 
       try {
         const user = await this.authService.signInWithGoogle();
-        this.successMessage = 'Connexion Google réussie ! Bienvenue ' + (user.displayName || user.email);
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1500);
+
+        // 🔥 créer user Firestore si inexistant
+        await setDoc(doc(this.firestore, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName || 'Utilisateur',
+          email: user.email,
+          photoURL: user.photoURL || null,
+          createdAt: new Date()
+        }, { merge: true });
+
+        this.successMessage = 'Connexion Google réussie !';
+        setTimeout(() => this.router.navigate(['/home']), 1500);
       } catch (error: any) {
         this.handleAuthError(error);
       } finally {
@@ -100,7 +120,6 @@ export class SignUpComponent implements OnDestroy {
     }
   }
 
-  // Connexion avec Facebook
   async signInWithFacebook() {
     if (!this.loading) {
       this.loading = true;
@@ -109,10 +128,17 @@ export class SignUpComponent implements OnDestroy {
 
       try {
         const user = await this.authService.signInWithFacebook();
-        this.successMessage = 'Connexion Facebook réussie ! Bienvenue ' + (user.displayName || user.email);
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1500);
+
+        await setDoc(doc(this.firestore, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName || 'Utilisateur',
+          email: user.email,
+          photoURL: user.photoURL || null,
+          createdAt: new Date()
+        }, { merge: true });
+
+        this.successMessage = 'Connexion Facebook réussie !';
+        setTimeout(() => this.router.navigate(['/home']), 1500);
       } catch (error: any) {
         this.handleAuthError(error);
       } finally {
@@ -121,7 +147,6 @@ export class SignUpComponent implements OnDestroy {
     }
   }
 
-  // Connexion avec Twitter
   async signInWithTwitter() {
     if (!this.loading) {
       this.loading = true;
@@ -130,10 +155,17 @@ export class SignUpComponent implements OnDestroy {
 
       try {
         const user = await this.authService.signInWithTwitter();
-        this.successMessage = 'Connexion Twitter réussie ! Bienvenue ' + (user.displayName || user.email);
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1500);
+
+        await setDoc(doc(this.firestore, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName || 'Utilisateur',
+          email: user.email,
+          photoURL: user.photoURL || null,
+          createdAt: new Date()
+        }, { merge: true });
+
+        this.successMessage = 'Connexion Twitter réussie !';
+        setTimeout(() => this.router.navigate(['/home']), 1500);
       } catch (error: any) {
         this.handleAuthError(error);
       } finally {
@@ -142,10 +174,7 @@ export class SignUpComponent implements OnDestroy {
     }
   }
 
-  // Gérer les erreurs d'authentification
   private handleAuthError(error: any) {
-    console.error('Erreur d\'authentification:', error);
-
     switch (error.code) {
       case 'auth/email-already-in-use':
         this.errorMessage = 'Cette adresse email est déjà utilisée.';
@@ -154,19 +183,10 @@ export class SignUpComponent implements OnDestroy {
         this.errorMessage = 'Adresse email invalide.';
         break;
       case 'auth/weak-password':
-        this.errorMessage = 'Le mot de passe est trop faible.';
-        break;
-      case 'auth/popup-closed-by-user':
-        this.errorMessage = 'La connexion a été annulée.';
-        break;
-      case 'auth/account-exists-with-different-credential':
-        this.errorMessage = 'Un compte existe déjà avec cette adresse email.';
-        break;
-      case 'auth/too-many-requests':
-        this.errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
+        this.errorMessage = 'Mot de passe trop faible.';
         break;
       default:
-        this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+        this.errorMessage = error.message || 'Erreur inconnue.';
     }
   }
 

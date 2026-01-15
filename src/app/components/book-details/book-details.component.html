@@ -117,10 +117,45 @@
                 <span class="button-icon">{{ isInFavorites ? '★' : '☆' }}</span>
                 {{ isInFavorites ? 'Dans mes favoris' : 'Ajouter à ma liste' }}
               </button>
+
+              <!--Share btn-->
+              <button 
+                class="secondary-button"
+                (click)="openShareDialog()"
+              >
+                <span class="button-icon">🔗</span>
+                Partager
+              </button>
+
+
             </div>
           </div>
         </div>
       </div>
     </main>
   </div>
+  
+  <!--share dialog -->
+<div *ngIf="showShareDialog" class="share-overlay">
+  <div class="share-dialog">
+    <h3>Partager avec un ami</h3>
+
+    <div *ngIf="friends.length === 0" class="empty-state">
+      Aucun ami à afficher
+    </div>
+
+    <ul class="friends-list">
+      <li *ngFor="let friend of friends">
+        <span>{{ friend.displayName }}</span>
+        <button (click)="shareWithFriend(friend.uid)">
+          Partager
+        </button>
+      </li>
+    </ul>
+
+    <button class="close-btn" (click)="closeShareDialog()">Fermer</button>
+  </div>
+</div>
+
+
 </div>

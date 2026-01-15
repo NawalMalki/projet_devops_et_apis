@@ -9,6 +9,8 @@ import { ReadingComponent } from "./components/reading/reading.component";
 import { FinishedComponent } from "./components/finished/finished.component";
 import { FavoritesComponent } from "./components/favorites/favorites.component";
 import { authGuard, publicGuard } from "./guards/auth.guard";
+import { DiscoverUsersComponent } from "./components/discover-users/discover-users.component";
+
 
 export const routes: Routes = [
   
@@ -62,6 +64,12 @@ export const routes: Routes = [
     component: FavoritesComponent,
     canActivate: [authGuard]
   },
+  { 
+  path: "discover-users", 
+  component: DiscoverUsersComponent,
+  canActivate: [authGuard]
+},
+  // Redirection pour toute autre route non définie
 
   { path: "**", redirectTo: "/sign-in" },
 ];

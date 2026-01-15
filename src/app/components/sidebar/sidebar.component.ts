@@ -28,6 +28,8 @@ export class SidebarComponent implements OnInit {
     { label: "En cours de lecture", route: "/reading", active: false },
     { label: "Terminés", route: "/finished", active: false },
     { label: "Favoris", route: "/favorites", active: false },
+    { label: "Découvrir des lecteurs", route: "/discover-users", active: false },
+
   ]
 
   categories: Category[] = [

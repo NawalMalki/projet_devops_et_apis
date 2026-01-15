@@ -6,6 +6,10 @@ import { HeaderComponent } from "../header/header.component"
 import { SidebarComponent } from "../sidebar/sidebar.component"
 import  { LibraryService } from "../../services/library.service"
 
+import { Auth } from '@angular/fire/auth';
+import { ShareService } from "../../services/share.service"
+import { FollowService } from "../../services/follow.service"
+
 @Component({
   selector: "app-book-details",
   templateUrl: "./book-details.component.html",
@@ -13,6 +17,8 @@ import  { LibraryService } from "../../services/library.service"
   imports: [CommonModule, HeaderComponent, SidebarComponent],
   styleUrls: ["./book-details.component.css"],
 })
+
+
 export class BookDetailsComponent implements OnInit {
   sidebarOpen = false
   book: Book | null = null
@@ -22,12 +28,21 @@ export class BookDetailsComponent implements OnInit {
   isInFavorites = false
   isFinished = false
   isLoadingStatus = true
+  // pour share
+  showShareDialog = false;
+  friends: any[] = [];
+
 
   constructor(
     public route: ActivatedRoute,
     public router: Router,
     private booksService: BooksService,
     private libraryService: LibraryService,
+
+    // ➕ AJOUT
+    private auth: Auth,
+    private followService: FollowService,
+    private shareService: ShareService
   ) {}
 
   ngOnInit() {
@@ -157,6 +172,38 @@ export class BookDetailsComponent implements OnInit {
         },
       })
     }
+  }
+
+  async loadFriends() {
+  const currentUserId = this.auth.currentUser?.uid;
+  if (!currentUserId) return;
+
+  this.friends = await this.followService.getFriends(currentUserId);
+}
+
+async shareWithFriend(friendId: string) {
+  const currentUserId = this.auth.currentUser?.uid;
+  if (!currentUserId || !this.book) return;
+
+  await this.shareService.shareBook({
+    bookId: this.book.id,
+    bookTitle: this.book.title,
+    bookCover: this.book.cover,
+    fromUserId: currentUserId,
+    toUserId: friendId
+  });
+
+  this.closeShareDialog();
+}
+
+
+  openShareDialog() {
+    this.showShareDialog = true;
+    this.loadFriends();
+  }
+
+  closeShareDialog() {
+    this.showShareDialog = false;
   }
 
   getStars(rating: number): string[] {

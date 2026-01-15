@@ -1,0 +1,18 @@
+<h2>Découvrir des lecteurs</h2>
+
+<div class="users-grid">
+  <div class="user-card" *ngFor="let user of users">
+    <div class="avatar">
+      {{ user.displayName?.charAt(0) }}
+    </div>
+
+    <div class="info">
+      <strong>{{ user.displayName }}</strong>
+      <small>{{ user.email }}</small>
+    </div>
+
+    <button (click)="follow(user.uid)">
+      Suivre
+    </button>
+  </div>
+</div>

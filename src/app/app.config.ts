@@ -13,14 +13,15 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(), 
     provideFirebaseApp(() => initializeApp({
-      projectId: "projet-devops-et-apis-f94a9",
-      appId: "1:314168005118:web:a4aece6564590f9075b0af",
-      storageBucket: "projet-devops-et-apis-f94a9.firebasestorage.app",
-      apiKey: "AIzaSyBwBpnjAtxHI5dwueC4QlChjA2j3d_GSiM",
-      authDomain: "projet-devops-et-apis-f94a9.firebaseapp.com",
-      messagingSenderId: "314168005118",
-      measurementId: "G-4RTSGDK235"
+      projectId: "projet-devops-et-apis-7dbab",
+      appId: "1:446629304058:web:c9fe26577f1751ce1b9b43",
+      storageBucket: "projet-devops-et-apis-7dbab.firebasestorage.app",
+      apiKey: "AIzaSyCmxQWaGi9-Ntt2UW_wVxHbHgLqcW-15AE",
+      authDomain: "projet-devops-et-apis-7dbab.firebaseapp.com",
+      messagingSenderId: "446629304058",
+      measurementId: "G-XVMX0WCX1G"
     })),
+  
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideHttpClient(withInterceptorsFromDi()),

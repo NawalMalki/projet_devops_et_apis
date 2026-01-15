@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
+
 import { 
   Auth, 
   createUserWithEmailAndPassword, 
@@ -26,7 +28,8 @@ export class AuthService {
 
   constructor(
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private firestore: Firestore
   ) {
     // Écouter les changements d'état de l'utilisateur
     this.user$ = user(this.auth);
@@ -66,15 +69,27 @@ export class AuthService {
 
   // Inscription avec Email et Mot de passe
   async signUpWithEmail(email: string, password: string, fullName: string): Promise<User> {
-    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+  const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+
+  await updateProfile(userCredential.user, {
+    displayName: fullName
+  });
+
+  await this.saveUserToFirestore(userCredential.user, fullName);
+
+  return userCredential.user;
+}
+
+  // async signUpWithEmail(email: string, password: string, fullName: string): Promise<User> {
+  //   const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
     
-    // Mettre à jour le profil avec le nom complet
-    await updateProfile(userCredential.user, {
-      displayName: fullName
-    });
+  //   // Mettre à jour le profil avec le nom complet
+  //   await updateProfile(userCredential.user, {
+  //     displayName: fullName
+  //   });
     
-    return userCredential.user;
-  }
+  //   return userCredential.user;
+  // }
 
   // Connexion avec Email et Mot de passe
   async signInWithEmail(email: string, password: string): Promise<User> {
@@ -83,14 +98,17 @@ export class AuthService {
   }
 
   // Connexion avec Google
-  async signInWithGoogle(): Promise<User> {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    const userCredential = await signInWithPopup(this.auth, provider);
-    return userCredential.user;
-  }
+ async signInWithGoogle(): Promise<User> {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const userCredential = await signInWithPopup(this.auth, provider);
+
+  await this.saveUserToFirestore(userCredential.user);
+
+  return userCredential.user;
+}
+
 
   // Connexion avec Facebook
   async signInWithFacebook(): Promise<User> {
@@ -116,4 +134,23 @@ export class AuthService {
   getCurrentUser(): User | null {
     return this.auth.currentUser;
   }
+
+  private async saveUserToFirestore(user: User, fullName?: string): Promise<void> {
+  const userRef = doc(this.firestore, 'users', user.uid);
+
+  // Vérifier si le user existe déjà (important pour Google/Facebook)
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      displayName: fullName || user.displayName || 'Utilisateur',
+      photoURL: user.photoURL || '',
+      provider: user.providerData[0]?.providerId || 'password',
+      createdAt: new Date()
+    });
+  }
+}
+
 }
