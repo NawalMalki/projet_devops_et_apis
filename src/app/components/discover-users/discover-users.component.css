@@ -1,62 +1,585 @@
-.users-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-  padding: 16px;
+.discover-container {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.user-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
+.main-content {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content.sidebar-closed {
+  margin-left: 0;
+}
+
+.fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-bottom: 1px solid #e4e6eb;
+}
+
+.content {
+  padding-top: 80px;
+  min-height: calc(100vh - 80px);
+}
+
+.discover-content {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header de la page */
+.page-header {
+  background: white;
   border-radius: 12px;
-  padding: 14px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.avatar {
-  width: 44px;
-  height: 44px;
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1c1e21;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  color: #65676b;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* Grille des utilisateurs style Facebook */
+.users-grid-fb {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.user-card-fb {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e4e6eb;
+}
+
+.user-card-fb:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Avatar */
+.user-avatar-fb {
+  padding: 32px 24px 20px;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.avatar-circle {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: #4f46e5;
+  background: linear-gradient(135deg, #1877f2, #4f46e5);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-size: 40px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 4px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.avatar-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Informations utilisateur */
+.user-info-fb {
+  padding: 16px 20px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-name {
   font-size: 18px;
+  font-weight: 600;
+  color: #1c1e21;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-.info {
-  flex: 1;
-  margin-left: 12px;
+.user-email {
+  color: #65676b;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-.info strong {
-  display: block;
+/* Actions utilisateur */
+.user-actions {
+  padding: 16px 20px 20px;
+  border-top: 1px solid #e4e6eb;
+  display: flex;
+  justify-content: center;
 }
 
-.info small {
-  color: #6b7280;
-}
-
-button {
-  padding: 6px 14px;
-  border-radius: 20px;
+.follow-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
   border: none;
-  cursor: pointer;
-  background: #4f46e5;
+  background-color: #1877f2;
   color: white;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+  min-height: 40px;
 }
 
-button.following {
-  background: #e5e7eb;
-  color: #111827;
+.follow-btn:hover {
+  background-color: #166fe5;
+  transform: translateY(-1px);
 }
 
-button:disabled {
+.follow-btn:active {
+  background-color: #1558b3;
+  transform: translateY(0);
+}
+
+.follow-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background-color: #e4e6eb;
+  color: #050505;
+  transform: none;
+}
+
+/* États */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #e4e6eb;
+  border-top-color: #1877f2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-section p {
+  color: #65676b;
+  font-size: 16px;
+  margin: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e4e6eb;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  color: #1c1e21;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #65676b;
+  margin: 0;
+  font-size: 15px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablettes grandes (1024px - 768px) */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 200px;
+  }
+  
+  .discover-content {
+    padding: 16px;
+    max-width: 100%;
+  }
+  
+  .users-grid-fb {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+  
+  .avatar-circle,
+  .avatar-img {
+    width: 90px;
+    height: 90px;
+    font-size: 36px;
+  }
+  
+  .user-avatar-fb {
+    padding: 24px 20px 16px;
+  }
+  
+  .user-info-fb {
+    padding: 12px 16px;
+  }
+  
+  .user-name {
+    font-size: 17px;
+  }
+  
+  .user-email {
+    font-size: 13px;
+  }
+}
+
+/* Tablettes (767px - 600px) */
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .content {
+    padding-top: 70px;
+  }
+  
+  .page-header {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  
+  .page-header h1 {
+    font-size: 24px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
+  .users-grid-fb {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+  }
+  
+  .user-card-fb {
+    border-radius: 10px;
+  }
+  
+  .avatar-circle,
+  .avatar-img {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    border-width: 3px;
+  }
+  
+  .user-actions {
+    padding: 12px 16px 16px;
+  }
+  
+  .follow-btn {
+    padding: 9px 16px;
+    font-size: 13px;
+    min-height: 38px;
+  }
+}
+
+/* Mobiles larges (599px - 480px) */
+@media (max-width: 599px) {
+  .users-grid-fb {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  
+  .discover-content {
+    padding: 12px;
+  }
+  
+  .user-avatar-fb {
+    padding: 20px 16px 12px;
+  }
+  
+  .avatar-circle,
+  .avatar-img {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+  }
+  
+  .user-info-fb {
+    padding: 10px 12px;
+  }
+  
+  .user-name {
+    font-size: 16px;
+    -webkit-line-clamp: 2;
+  }
+  
+  .user-email {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+  }
+  
+  .loading-section {
+    padding: 60px 16px;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .empty-state {
+    padding: 60px 16px;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+  }
+  
+  .empty-state h3 {
+    font-size: 18px;
+  }
+  
+  .empty-state p {
+    font-size: 14px;
+  }
+}
+
+/* Mobiles petits (479px - 320px) */
+@media (max-width: 479px) {
+  .users-grid-fb {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .user-card-fb {
+    max-width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px;
+    height: auto;
+  }
+  
+  .user-avatar-fb {
+    padding: 0;
+    background: none;
+    flex-shrink: 0;
+  }
+  
+  .avatar-circle,
+  .avatar-img {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    border-width: 2px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  
+  .user-info-fb {
+    padding: 0 12px;
+    text-align: left;
+    flex-grow: 1;
+    min-width: 0; /* Important pour ellipsis */
+  }
+  
+  .user-name {
+    font-size: 15px;
+    margin-bottom: 2px;
+    -webkit-line-clamp: 1;
+  }
+  
+  .user-email {
+    font-size: 12px;
+    -webkit-line-clamp: 1;
+  }
+  
+  .user-actions {
+    padding: 0;
+    border-top: none;
+    flex-shrink: 0;
+  }
+  
+  .follow-btn {
+    width: auto;
+    min-width: 80px;
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 34px;
+    white-space: nowrap;
+  }
+  
+  .page-header {
+    padding: 16px 12px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+  
+  .content {
+    padding-top: 60px;
+  }
+}
+
+/* Très petits mobiles (en dessous de 320px) */
+@media (max-width: 320px) {
+  .discover-content {
+    padding: 8px;
+  }
+  
+  .user-card-fb {
+    padding: 10px;
+  }
+  
+  .avatar-circle,
+  .avatar-img {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+  
+  .user-info-fb {
+    padding: 0 8px;
+  }
+  
+  .user-name {
+    font-size: 14px;
+  }
+  
+  .user-email {
+    font-size: 11px;
+  }
+  
+  .follow-btn {
+    min-width: 70px;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+/* Ajouter ces styles dans le fichier CSS existant */
+
+/* Style pour le bouton "Retirer le suivi" */
+.unfollow-btn {
+  background-color: #e4e6eb !important;
+  color: #050505 !important;
+}
+
+.unfollow-btn:hover {
+  background-color: #d8dadf !important;
+  color: #050505 !important;
+}
+
+.unfollow-btn:active {
+  background-color: #c8cacf !important;
+}
+
+/* Indicateur de chargement dans le bouton */
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-loading .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.unfollow-btn .btn-loading .spinner {
+  border: 2px solid rgba(5, 5, 5, 0.3);
+  border-top-color: #050505;
+}
+
+/* Animation du spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Style pour le bouton désactivé */
+.follow-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.follow-btn:disabled:hover {
+  transform: none;
+  background-color: inherit;
 }

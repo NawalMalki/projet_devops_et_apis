@@ -1,18 +1,73 @@
-<h2>Découvrir des lecteurs</h2>
+<!-- discover-users.component.html -->
+<div class="discover-container">
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
 
-<div class="users-grid">
-  <div class="user-card" *ngFor="let user of users">
-    <div class="avatar">
-      {{ user.displayName?.charAt(0) }}
-    </div>
+  <div class="main-content" [class.sidebar-closed]="!sidebarOpen">
+    <app-header 
+      class="fixed-header"
+      (toggleSidebar)="toggleSidebar()"
+    ></app-header>
+    
+    <main class="content discover-content">
+      <!-- Titre de la page -->
+      <div class="page-header">
+        <h1>Découvrir des lecteurs</h1>
+        <p class="page-subtitle">Connectez-vous avec d'autres passionnés de lecture</p>
+      </div>
 
-    <div class="info">
-      <strong>{{ user.displayName }}</strong>
-      <small>{{ user.email }}</small>
-    </div>
+      <!-- Indicateur de chargement -->
+      <div *ngIf="isLoading" class="loading-section">
+        <div class="loading-spinner"></div>
+        <p>Chargement des lecteurs...</p>
+      </div>
 
-    <button (click)="follow(user.uid)">
-      Suivre
-    </button>
+      <!-- Message si aucun utilisateur -->
+      <div *ngIf="!isLoading && users.length === 0" class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>Aucun lecteur à découvrir pour le moment</h3>
+        <p>Revenez plus tard pour trouver de nouveaux lecteurs à suivre</p>
+      </div>
+
+      <!-- Grille des utilisateurs avec style Facebook -->
+      <div *ngIf="!isLoading && users.length > 0" class="users-grid-fb">
+        <div class="user-card-fb" *ngFor="let user of users">
+          <!-- Avatar/Image de profil -->
+          <div class="user-avatar-fb">
+            <div class="avatar-circle" *ngIf="!user.photoURL">
+              {{ user.displayName?.charAt(0)?.toUpperCase() }}
+            </div>
+            <img 
+              *ngIf="user.photoURL" 
+              [src]="user.photoURL" 
+              [alt]="user.displayName"
+              class="avatar-img"
+            />
+          </div>
+
+          <!-- Informations de l'utilisateur -->
+          <div class="user-info-fb">
+            <h3 class="user-name">{{ user.displayName }}</h3>
+            <p class="user-email">{{ user.email }}</p>
+          </div>
+
+          <!-- Bouton Suivre/Retirer le suivi -->
+          <div class="user-actions">
+            <button 
+              class="follow-btn"
+              [class.unfollow-btn]="isFollowingUser(user.uid)"
+              [disabled]="loadingFollowAction.get(user.uid)"
+              (click)="toggleFollow(user.uid)"
+            >
+              <span *ngIf="loadingFollowAction.get(user.uid)" class="btn-loading">
+                <span class="spinner"></span>
+              </span>
+              <span *ngIf="!loadingFollowAction.get(user.uid)">
+                {{ isFollowingUser(user.uid) ? 'Retirer le suivi' : 'Suivre' }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>

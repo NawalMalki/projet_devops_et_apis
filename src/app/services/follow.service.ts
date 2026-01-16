@@ -98,4 +98,19 @@ export class FollowService {
 
     return friends;
   }
+
+// =====================
+// CHECK IF FOLLOWING
+// =====================
+async isFollowing(currentUserId: string, targetUserId: string): Promise<boolean> {
+  const ref = collection(this.firestore, 'follows');
+  const q = query(
+    ref,
+    where('followerId', '==', currentUserId),
+    where('followingId', '==', targetUserId)
+  );
+  
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
 }
