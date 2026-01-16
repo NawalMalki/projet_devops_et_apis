@@ -10,11 +10,17 @@ import {
   doc,
   getDoc
 } from '@angular/fire/firestore';
+import { NotificationService } from './notification.service';
+import { Auth } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
 export class FollowService {
 
-  constructor(private firestore: Firestore) {}
+  constructor(
+    private firestore: Firestore,
+    private notificationService: NotificationService,
+    private auth: Auth
+  ) {}
 
   // =====================
   // FOLLOW
@@ -27,6 +33,18 @@ export class FollowService {
       followingId: targetUserId,
       createdAt: new Date()
     });
+
+    // Créer une notification pour l'utilisateur suivi
+    try {
+      const currentUser = this.auth.currentUser;
+      if (currentUser) {
+        const followerName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Quelqu\'un';
+        await this.notificationService.notifyUserFollow(followerName, currentUserId, targetUserId).toPromise();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création de la notification de suivi:', error);
+      // Ne pas échouer l'opération de suivi si la notification échoue
+    }
   }
 
   // =====================

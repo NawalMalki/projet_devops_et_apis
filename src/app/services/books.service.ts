@@ -238,7 +238,7 @@ export class BooksService {
         const genres: Genre[] = Object.keys(genreMap).map((name) => ({
           name,
           count: genreMap[name],
-          icon: '📚',
+          icon: 'fas fa-book',
           query: name.toLowerCase()
         }))
 

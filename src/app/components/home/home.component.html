@@ -12,8 +12,9 @@
       <section class="hero-section">
         <!-- Mode normal (pas de recherche) -->
         <div *ngIf="!isSearchActive">
-          <h1 class="hero-title">Content de te revoir, lecteur !</h1>
-          <p class="hero-subtitle">Découvre notre sélection de livres</p>
+          <h1 class="hero-title">Bienvenue {{ userName }} !</h1>
+          <p class="hero-subtitle">Votre bibliothèque personnelle vous attend</p>
+          <p class="hero-description">Découvrez des milliers de livres, partagez vos lectures avec des amis, et créez votre propre collection littéraire dans une communauté passionnée de lecteurs.</p>
         </div>
         
         <!-- Mode recherche -->
@@ -41,7 +42,7 @@
           
           <div class="search-controls">
             <button class="clear-search-btn" (click)="clearSearch()">
-              ✕ Nouvelle recherche
+              <i class="fas fa-times"></i> Nouvelle recherche
             </button>
           </div>
         </div>
@@ -74,7 +75,7 @@
           <section class="section" *ngIf="allBooks.length > 0">
             <div class="section-header">
               <h2 class="section-title">
-                <span class="section-icon">📚</span>
+                <i class="fas fa-book section-icon"></i>
                 Tous les livres
               </h2>
             </div>
@@ -101,7 +102,7 @@
                   <h3 class="book-title">{{ book.title }}</h3>
                   <p class="book-author">{{ book.author }}</p>
                   <div class="book-meta">
-                    <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
+                    <span class="book-rating"><i class="fas fa-star"></i> {{ formatRating(book.rating) }}</span>
                     <span class="book-genre">{{ book.genre }}</span>
                   </div>
                 </div>
@@ -122,7 +123,7 @@
           <div *ngIf="showSingleBookCard" class="single-book-section">
             <div class="single-book-header">
               <h2 class="section-title">
-                <span class="section-icon">🔍</span>
+                <i class="fas fa-search section-icon"></i>
                 Livre trouvé
                 <span class="exact-match-badge">Correspondance exacte</span>
               </h2>
@@ -147,7 +148,7 @@
                   <p class="single-book-author">Par {{ allBooks[0].author }}</p>
                   
                   <div class="single-book-rating">
-                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
                     <span class="rating-value">{{ formatRating(allBooks[0].rating) }}/5</span>
                   </div>
                   
@@ -174,9 +175,9 @@
           <div *ngIf="showBooksGrid" class="search-results-section">
             <div class="section-header">
               <h2 class="section-title">
-                <span class="section-icon" *ngIf="searchType === 'author'">👤</span>
-                <span class="section-icon" *ngIf="searchType === 'genre'">📚</span>
-                <span class="section-icon" *ngIf="searchType === 'title'">🔍</span>
+                <i class="fas fa-user section-icon" *ngIf="searchType === 'author'"></i>
+                <i class="fas fa-book section-icon" *ngIf="searchType === 'genre'"></i>
+                <i class="fas fa-search section-icon" *ngIf="searchType === 'title'"></i>
                 {{ allBooks.length }} livre(s) trouvé(s)
                 <span class="search-type-badge" *ngIf="searchTypeFormatted">
                   {{ searchTypeFormatted }}
@@ -212,7 +213,7 @@
                   <h3 class="book-title">{{ book.title }}</h3>
                   <p class="book-author">{{ book.author }}</p>
                   <div class="book-meta">
-                    <span class="book-rating">⭐ {{ formatRating(book.rating) }}</span>
+                    <span class="book-rating"><i class="fas fa-star"></i> {{ formatRating(book.rating) }}</span>
                     <span class="book-genre">{{ book.genre }}</span>
                   </div>
                 </div>

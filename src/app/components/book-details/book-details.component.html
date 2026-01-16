@@ -94,7 +94,7 @@
                 class="finish-button"
                 (click)="finishReading()"
               >
-                <span class="button-icon">✓</span>
+                <i class="fas fa-check button-icon"></i>
                 Terminer la lecture
               </button>
 
@@ -103,7 +103,7 @@
                 class="finished-badge"
                 disabled
               >
-                <span class="button-icon">✓</span>
+                <i class="fas fa-check button-icon"></i>
                 Terminé
               </button>
 
@@ -114,7 +114,7 @@
                 (click)="toggleFavorite()"
                 [disabled]="isLoadingStatus"
               >
-                <span class="button-icon">{{ isInFavorites ? '★' : '☆' }}</span>
+                <i [class]="isInFavorites ? 'fas fa-star button-icon' : 'far fa-star button-icon'"></i>
                 {{ isInFavorites ? 'Dans mes favoris' : 'Ajouter à ma liste' }}
               </button>
 
@@ -123,7 +123,7 @@
                 class="secondary-button"
                 (click)="openShareDialog()"
               >
-                <span class="button-icon">🔗</span>
+                <i class="fas fa-link button-icon"></i>
                 Partager
               </button>
 

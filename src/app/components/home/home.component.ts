@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from "@angular/router"
 import { SidebarComponent } from "../sidebar/sidebar.component"
 import { HeaderComponent } from "../header/header.component"
 import { BooksService, Book } from "../../services/books.service"
+import { AuthService } from "../../AuthService/auth.service"
 import { Subscription } from "rxjs"
 
 @Component({
@@ -24,16 +25,27 @@ export class HomeComponent implements OnInit, OnDestroy {
   isSearchActive = false;
   searchQuery: string = "";
   searchType: string = ""; // 'title', 'author', 'genre'
+  userName: string = "lecteur";
   
   private queryParamsSubscription?: Subscription
 
   constructor(
     private booksService: BooksService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
+    // Initialiser le nom d'utilisateur
+    this.authService.user$.subscribe(user => {
+      if (user && user.displayName) {
+        this.userName = user.displayName.split(' ')[0] // Prendre seulement le prénom
+      } else if (user && user.email) {
+        this.userName = user.email.split('@')[0] // Utiliser la partie avant @ de l'email
+      }
+    })
+
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       const genre = params['genre']
       const search = params['search']
@@ -96,7 +108,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         )
         this.isLoading = false
         
-        console.log('📚 Livres mélangés chargés:', this.allBooks.length)
+        console.log('Livres mélangés chargés:', this.allBooks.length)
         
         if (this.allBooks.length === 0) {
           this.error = "Aucun livre trouvé. Veuillez réessayer."
@@ -119,7 +131,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.error = null
     this.allBooks = []
     
-    console.log('🔍 Chargement du genre:', genre)
+    console.log('Chargement du genre:', genre)
     
     this.booksService.getBooksByGenre(genre, 40).subscribe({
       next: (books) => {
@@ -131,7 +143,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         )
         this.isLoading = false
         
-        console.log(`📚 Livres "${genre}" chargés:`, this.allBooks.length)
+        console.log(`Livres "${genre}" chargés:`, this.allBooks.length)
         
         if (this.allBooks.length === 0) {
           this.error = `Aucun livre trouvé pour "${this.formatGenreName(genre)}"`
@@ -157,7 +169,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.searchQuery = query
     this.searchType = 'title'
     
-    console.log(`🔍 Recherche par TITRE pour: "${query}"`);
+    console.log(`Recherche par TITRE pour: "${query}"`);
     
     this.booksService.searchExactTitle(query).subscribe({
       next: (books) => {
@@ -190,7 +202,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.searchQuery = authorName
     this.searchType = 'author'
     
-    console.log(`🔍 Recherche par AUTEUR pour: "${authorName}"`);
+    console.log(`Recherche par AUTEUR pour: "${authorName}"`);
     
     this.booksService.searchByAuthor(authorName).subscribe({
       next: (books) => {
@@ -223,7 +235,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.searchQuery = genreName
     this.searchType = 'genre'
     
-    console.log(`🔍 Recherche par GENRE pour: "${genreName}"`);
+    console.log(`Recherche par GENRE pour: "${genreName}"`);
     
     this.booksService.searchByGenre(genreName).subscribe({
       next: (books) => {

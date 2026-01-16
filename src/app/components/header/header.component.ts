@@ -177,15 +177,15 @@ onSearch() {
   getNotificationIcon(type: string): string {
     switch (type) {
       case "book_added":
-        return "📚";
+        return "fas fa-book";
       case "book_finished":
-        return "🎉";
+        return "fas fa-check-circle";
       case "book_favorite":
-        return "⭐";
+        return "fas fa-star";
       case "reading_progress":
-        return "📖";
+        return "fas fa-book-open";
       default:
-        return "🔔";
+        return "fas fa-bell";
     }
   }
 

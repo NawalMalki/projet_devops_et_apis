@@ -1,165 +1,146 @@
 <div class="profile-container">
-  <!-- Loading state -->
+
+  <!-- BOUTON RETOUR -->
+  <button class="back-button" (click)="router.navigate(['/home'])">
+    ← Retour à l'accueil
+  </button>
+
+  <!-- LOADING -->
   <div *ngIf="loading" class="loading-state">
     <div class="spinner"></div>
     <p>Chargement du profil...</p>
   </div>
 
-  <!-- Profile content -->
+  <!-- PROFIL -->
   <div *ngIf="!loading && currentUser">
+
     <div class="profile-header">
       <div class="profile-banner"></div>
+
       <div class="profile-info">
+
         <div class="avatar-section">
           <img [src]="userProfile.avatar" alt="Profil" class="profile-avatar" />
-          <button class="avatar-edit-button" *ngIf="isEditMode" (click)="onAvatarChange()">
-            <span>📷</span>
-          </button>
         </div>
+
         <div class="user-details">
-          <!-- Mode affichage -->
-          <h1 class="user-name" *ngIf="!isEditMode">{{ userProfile.name }}</h1>
-          
-          <!-- Mode édition -->
-          <input 
-            type="text" 
-            class="user-name-input" 
-            [(ngModel)]="editForm.name"
+
+          <h1 class="user-name" *ngIf="!isEditMode">
+            {{ userProfile.name }}
+          </h1>
+
+          <input
             *ngIf="isEditMode"
-            placeholder="Votre nom"
+            class="user-name-input"
+            [value]="editForm.name"
+            (input)="editForm.name = $any($event.target).value"
           />
-          
+
           <p class="user-email">{{ userProfile.email }}</p>
-          
-          <!-- Mode affichage -->
-          <p class="user-bio" *ngIf="!isEditMode && userProfile.bio">{{ userProfile.bio }}</p>
-          <p class="user-bio" *ngIf="!isEditMode && !userProfile.bio" style="color: #888;">Ajoutez une bio pour vous présenter...</p>
-          
-          <!-- Mode édition -->
-          <textarea 
-            class="user-bio-input" 
+
+          <p class="user-bio" *ngIf="!isEditMode">
+            {{ userProfile.bio || 'Ajoutez une bio...' }}
+          </p>
+
+          <textarea
             *ngIf="isEditMode"
-            [(ngModel)]="editForm.bio"
-            placeholder="Parlez de vos goûts littéraires..."
+            class="user-bio-input"
             rows="4"
-          ></textarea>
-          
-          <p class="user-join-date">Membre depuis {{ userProfile.joinDate }}</p>
+            (input)="editForm.bio = $any($event.target).value"
+          >{{ editForm.bio }}</textarea>
+
+          <p class="user-join-date">
+            Membre depuis {{ userProfile.joinDate }}
+          </p>
+
         </div>
+
         <div class="profile-actions">
-          <button class="btn-edit" *ngIf="!isEditMode" (click)="toggleEditMode()">
-            ✏️ Modifier le profil
+
+          <button
+            *ngIf="!isEditMode"
+            class="btn-edit"
+            (click)="toggleEditMode()">
+            Modifier le profil
           </button>
-          <button class="btn-save" *ngIf="isEditMode" (click)="saveProfile()" [disabled]="saving">
-            {{ saving ? 'Enregistrement...' : '💾 Enregistrer' }}
+
+          <button
+            *ngIf="isEditMode"
+            class="btn-save"
+            (click)="saveProfile()"
+            [disabled]="saving">
+            Enregistrer
           </button>
-          <button class="btn-cancel" *ngIf="isEditMode" (click)="cancelEdit()">
-            ❌ Annuler
+
+          <button
+            *ngIf="isEditMode"
+            class="btn-cancel"
+            (click)="cancelEdit()">
+            Annuler
           </button>
+
         </div>
+
       </div>
     </div>
 
+    <!-- STATS -->
     <div class="profile-stats">
-      <div class="stat-card">
-        <div class="stat-icon">📚</div>
-        <div class="stat-value">{{ userProfile.stats.booksRead }}</div>
-        <div class="stat-label">Livres lus</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📖</div>
-        <div class="stat-value">{{ userProfile.stats.currentlyReading }}</div>
-        <div class="stat-label">En cours</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-value">{{ userProfile.stats.favorites }}</div>
-        <div class="stat-label">Favoris</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">✍️</div>
-        <div class="stat-value">{{ userProfile.stats.reviews }}</div>
-        <div class="stat-label">Avis</div>
-      </div>
+      <div class="stat-card">📚 {{ userProfile.stats.booksRead }}</div>
+      <div class="stat-card">📖 {{ userProfile.stats.currentlyReading }}</div>
+      <div class="stat-card">⭐ {{ userProfile.stats.favorites }}</div>
     </div>
 
-    <!-- Messages de succès/erreur -->
-    <div *ngIf="successMessage" class="alert alert-success">
-      {{ successMessage }}
-    </div>
-    <div *ngIf="errorMessage" class="alert alert-error">
-      {{ errorMessage }}
-    </div>
-
+    <!-- CONTENT -->
     <div class="profile-content">
+
+      <!-- TABS -->
       <div class="content-tabs">
-        <button 
-          class="tab-button" 
-          [class.tab-active]="activeTab === 'activity'"
-          (click)="switchTab('activity')"
-        >
-          Activité de lecture
-        </button>
         <button 
           class="tab-button"
           [class.tab-active]="activeTab === 'favorites'"
-          (click)="switchTab('favorites')"
-        >
-          Favoris
+          (click)="switchTab('favorites')">
+          Numéro de partages
         </button>
-        <button 
-          class="tab-button"
-          [class.tab-active]="activeTab === 'reviews'"
-          (click)="switchTab('reviews')"
-        >
-          Avis
-        </button>
+
         <button 
           class="tab-button"
           [class.tab-active]="activeTab === 'settings'"
-          (click)="switchTab('settings')"
-        >
-          Paramètres
+          (click)="switchTab('settings')">
+          ⚙️ Paramètres
         </button>
       </div>
+      
+      <!-- SETTINGS TAB -->
+      <div *ngIf="activeTab === 'settings'" class="settings-tab">
+          
 
-      <div class="tab-content">
-        <!-- Tab Activité -->
-        <div *ngIf="activeTab === 'activity'">
-          <p class="empty-state">Votre activité de lecture apparaîtra ici</p>
-        </div>
 
-        <!-- Tab Favoris -->
-        <div *ngIf="activeTab === 'favorites'">
-          <p class="empty-state">Vos livres favoris apparaîtront ici</p>
-        </div>
-
-        <!-- Tab Avis -->
-        <div *ngIf="activeTab === 'reviews'">
-          <p class="empty-state">Vos avis sur les livres apparaîtront ici</p>
-        </div>
-
-        <!-- Tab Paramètres -->
-        <div *ngIf="activeTab === 'settings'">
-          <div class="settings-section">
-            <h3>Paramètres du compte</h3>
-            <div class="setting-item">
-              <label>Email de notification</label>
-              <input type="email" [value]="userProfile.email" disabled />
-            </div>
-            <div class="setting-item">
-              <button class="btn-danger" (click)="onDeleteAccount()">
-                🗑️ Supprimer le compte
-              </button>
-            </div>
+          <div class="danger-zone">
+           
+            <p class="danger-description">
+              Cette action est irréversible.
+               <button
+              class="btn-danger"
+              (click)="onDeleteAccount()"
+            >
+              Supprimer le compte
+            </button>
+            </p>
+           
           </div>
-        </div>
+
+      
+
       </div>
+
     </div>
+
   </div>
 
-  <!-- Error state -->
+  <!-- PAS CONNECTÉ -->
   <div *ngIf="!loading && !currentUser" class="error-state">
-    <p>Impossible de charger le profil. Veuillez vous reconnecter.</p>
+    <p>Veuillez vous reconnecter.</p>
   </div>
+
 </div>

@@ -17,12 +17,14 @@ import { Observable, from, map, of, BehaviorSubject } from "rxjs";
 export interface Notification {
   id?: string;
   userId: string;
-  type: "book_added" | "book_finished" | "book_favorite" | "reading_progress";
+  type: "book_added" | "book_finished" | "book_favorite" | "reading_progress" | "user_follow" | "book_shared";
   title: string;
   message: string;
   bookId?: string;
   bookTitle?: string;
   bookCover?: string;
+  fromUserId?: string;
+  fromUserName?: string;
   isRead: boolean;
   createdAt: Date;
 }
@@ -226,5 +228,56 @@ export class NotificationService {
       bookTitle,
       bookCover,
     });
+  }
+
+  // Notification pour quand quelqu'un vous suit
+  notifyUserFollow(followerName: string, followerId: string, targetUserId: string): Observable<void> {
+    // Créer une notification pour l'utilisateur suivi (targetUserId)
+    const notificationsCollection = collection(this.firestore, "notifications");
+
+    const notificationData = {
+      userId: targetUserId,
+      type: "user_follow" as const,
+      title: "Nouveau follower ",
+      message: `${followerName} a commencé à vous suivre`,
+      fromUserId: followerId,
+      fromUserName: followerName,
+      isRead: false,
+      createdAt: Timestamp.now(),
+    };
+
+    return from(
+      addDoc(notificationsCollection, notificationData).then(() => {
+        // Recharger le compteur pour l'utilisateur cible
+        this.loadUnreadCount();
+      })
+    );
+  }
+
+  // Notification pour quand quelqu'un partage un livre avec vous
+  notifyBookShared(bookTitle: string, bookId: string, bookCover: string, sharerName: string, sharerId: string, targetUserId: string): Observable<void> {
+    // Créer une notification pour l'utilisateur avec qui on partage (targetUserId)
+    const notificationsCollection = collection(this.firestore, "notifications");
+
+    const notificationData = {
+      userId: targetUserId,
+      type: "book_shared" as const,
+      title: "Livre partagé ",
+      message: `${sharerName} vous a partagé "${bookTitle}"`,
+      bookId,
+      bookTitle,
+      bookCover,
+      fromUserId: sharerId,
+      fromUserName: sharerName,
+      isRead: false,
+      createdAt: Timestamp.now(),
+    };
+
+    return from(
+      addDoc(notificationsCollection, notificationData).then(() => {
+        // Recharger le compteur pour l'utilisateur cible
+        this.loadUnreadCount();
+      })
+    );
   }
 }

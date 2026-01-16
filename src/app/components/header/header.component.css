@@ -22,14 +22,16 @@
 .image-logo{
   height: 40px;
   width: 40px;
+  border-radius: 50%;
 }
 
 .header {
-  position : relative; 
+  position : relative;
   margin: 20px;
   height: 5rem;
-  background: #FFFBF2;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 251, 242, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(160, 86, 29, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,8 +39,14 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  box-shadow: var(--shadow-soft);
   border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.header:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
 }
 
 .header-left {
@@ -80,10 +88,19 @@
 .search-bar {
   display: flex;
   align-items: center;
-  background: #f5f5f5;
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(160, 86, 29, 0.2);
+  border-radius: 25px;
   padding: 0.625rem 1rem;
   gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(160, 86, 29, 0.05);
+}
+
+.search-bar:focus-within {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--app-brown);
+  box-shadow: 0 0 0 3px rgba(160, 86, 29, 0.1), inset 0 2px 4px rgba(160, 86, 29, 0.05);
 }
 
 .search-icon {
@@ -259,6 +276,10 @@
 }
 
 .dropdown-item.logout {
+  color: #dc2626;
+}
+
+.dropdown-item.logout i {
   color: #dc2626;
 }
 

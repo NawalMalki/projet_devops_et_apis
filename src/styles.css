@@ -3,18 +3,90 @@ body{
     padding: 0;
 }
 
-
-/* .playfair-display-font {
-  font-family: "Playfair Display", serif;
-  font-optical-sizing: auto;
-  font-weight: 200;
-  font-style: normal;
+:root{
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --app-brown: #A0561D;
+  --app-cream: #FFFBF2;
+  --app-light-brown: #D4AF37;
+  --app-dark-brown: #8B4513;
+  --app-gradient: linear-gradient(135deg, #FFFBF2 0%, #F5E6CC 100%);
+  --shadow-soft: 0 4px 20px rgba(160, 86, 29, 0.1);
+  --shadow-medium: 0 8px 32px rgba(160, 86, 29, 0.15);
+  --shadow-strong: 0 16px 48px rgba(160, 86, 29, 0.2);
 }
 
+/* Star icons styling */
+.fa-star {
+  color: #ffd700 !important;
+}
 
-.playfair-display-fonti {
-  font-family: "Playfair Display", serif;
-  font-optical-sizing: auto;
-  font-weight:400;
-  font-style: normal;
-} */
+html, body {
+  height: 100%;
+  font-family: var(--ff-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  color: #2D1810;
+  background: white;
+  background-attachment: fixed;
+}
+
+/* Headings slightly heavier for better contrast */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Keep UI elements readable */
+button, input, textarea, select {
+  font-family: var(--ff-display);
+}
+
+/* Utility class kept for components that previously referenced it */
+.playfair-display-font {
+  font-family: var(--ff-display);
+}
+
+/* Global Font Awesome icon color to match app brown */
+.fa, .fas, .far, .fal, .fab, i[class*="fa-"] {
+  color: var(--app-brown) !important;
+}
+
+/* Keep finish/terminated check icons green */
+.finish-button .button-icon,
+.finished-badge .button-icon {
+  color: #28a745 !important;
+}
+
+/* Elegant loading spinner */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(160, 86, 29, 0.1);
+  border-top: 3px solid var(--app-brown);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Smooth transitions for all interactive elements */
+button, .book-card, .nav-item, .search-bar, .header {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Subtle text shadow for better readability */
+.hero-title {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Elegant focus states */
+button:focus, input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(160, 86, 29, 0.2);
+}

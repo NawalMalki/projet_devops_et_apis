@@ -24,7 +24,8 @@
                 "input": "public"
               },
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/app/assets"
             ],
             "styles": ["src/styles.css"],
             "scripts": []
@@ -79,7 +80,8 @@
                 "input": "public"
               },
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/app/assets"
             ],
             "styles": ["src/styles.css"],
             "scripts": []

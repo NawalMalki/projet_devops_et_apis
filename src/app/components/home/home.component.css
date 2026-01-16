@@ -2,7 +2,7 @@
 .home-container {
   display: flex;
   min-height: 100vh;
-  background: #fafafa;
+  background: white;
 }
 
 .main-content {
@@ -19,7 +19,7 @@
 
 .content {
   flex: 1;
-  padding-top: 4rem; /* Espace pour le header fixe */
+  padding-top: 0; /* Pas d'espace supplémentaire car le header est au-dessus de la hero section */
 }
 
 /* --- Fixed Header --- */
@@ -29,20 +29,26 @@
   left: 0;
   width: 100%;
   z-index: 1000;
+  margin: 0 !important;
 }
 
 /* --- Hero Section --- */
 .hero-section {
-  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
     url('../../assets/images/signinbackground.gif') no-repeat center center;
   background-size: cover;
   color: white;
   text-align: center;
-  padding: 6rem 2rem 4rem 2rem;
+  padding: 4rem 2rem 4rem 2rem;
   margin-top: 0;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   position: relative;
   z-index: 1;
+  min-height: calc(30vh + 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .hero-title {
@@ -55,8 +61,17 @@
 
 .hero-subtitle {
   font-size: 1.125rem;
-  margin: 0;
+  margin: 0 0 1rem 0;
   opacity: 0.9;
+}
+
+.hero-description {
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.8;
+  max-width: 600px;
+  line-height: 1.6;
+  font-weight: 300;
 }
 
 /* --- Sections --- */
@@ -103,7 +118,7 @@
 .book-card {
   background: white;
   border-radius: 0.75rem;
-  border: 1px solid rgb(128, 108, 24); 
+  border: 1px solid rgb(128, 108, 24);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;

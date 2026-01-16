@@ -1,7 +1,7 @@
 .favorites-container{
   display: flex;
   min-height: 100vh;
-  background: #fafafa;
+  background: white;
 }
 
 .main-content {
@@ -183,7 +183,7 @@
   height: 44px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  background: var(--app-brown);
   color: white;
   font-size: 24px;
   cursor: pointer;
@@ -197,7 +197,7 @@
 }
 
 .favorite-star-btn:hover {
-  background: linear-gradient(135deg, #ff6b6b, #ff8787);
+  background: var(--app-dark-brown);
   transform: scale(1.15) rotate(-15deg);
   box-shadow: 0 6px 16px rgba(255, 107, 107, 0.5);
 }

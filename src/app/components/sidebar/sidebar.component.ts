@@ -1,8 +1,9 @@
 import { CommonModule } from "@angular/common"
-import { Component, Input, Output, EventEmitter, OnInit } from "@angular/core"
-import { Router, RouterModule } from "@angular/router"
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from "@angular/core"
+import { Router, RouterModule, NavigationEnd } from "@angular/router"
 import { BooksService } from "../../services/books.service"
 import { forkJoin } from "rxjs"
+import { filter } from "rxjs/operators"
 
 interface Category {
   name: string
@@ -18,7 +19,7 @@ interface Category {
   imports: [CommonModule, RouterModule],
   styleUrls: ["./sidebar.component.css"],
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent implements OnInit, OnDestroy {
   @Input() isOpen = false
   @Output() isOpenChange = new EventEmitter<boolean>()
 
@@ -51,6 +52,28 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit() {
     this.loadGenreCounts()
+    this.updateActiveMenuItem()
+    
+    // Écouter les changements de route pour mettre à jour l'élément actif
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.updateActiveMenuItem()
+    })
+  }
+
+  ngOnDestroy() {
+    // Le pipe filter et subscribe gèrent automatiquement le nettoyage
+  }
+
+  /**
+   * Met à jour l'élément de menu actif en fonction de la route actuelle
+   */
+  updateActiveMenuItem() {
+    const currentUrl = this.router.url.split('?')[0] // Enlever les query params
+    this.menuItems.forEach(item => {
+      item.active = item.route === currentUrl
+    })
   }
 
   /**
