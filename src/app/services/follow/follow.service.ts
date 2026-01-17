@@ -10,7 +10,7 @@ import {
   doc,
   getDoc
 } from '@angular/fire/firestore';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '../notification/notification.service';
 import { Auth } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })

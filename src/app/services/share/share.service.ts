@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, Timestamp, query, where, getDocs } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, from, map } from 'rxjs';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class ShareService {

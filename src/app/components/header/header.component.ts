@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { Auth, signOut } from "@angular/fire/auth";
-import { NotificationService, Notification } from "../../services/notification.service";
+import { NotificationService, Notification } from "../../services/notification/notification.service";
 import { Subscription } from "rxjs";
 
 interface UserProfile {

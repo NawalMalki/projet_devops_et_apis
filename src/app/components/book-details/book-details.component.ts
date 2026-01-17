@@ -1,14 +1,14 @@
 import { CommonModule } from "@angular/common"
 import { Component, type OnInit } from "@angular/core"
 import  { ActivatedRoute, Router } from "@angular/router"
-import  { BooksService, Book } from "../../services/books.service"
+import  { BooksService, Book } from "../../services/books/books.service"
 import { HeaderComponent } from "../header/header.component"
 import { SidebarComponent } from "../sidebar/sidebar.component"
-import  { LibraryService } from "../../services/library.service"
+import  { LibraryService } from "../../services/library/library.service"
 
 import { Auth } from '@angular/fire/auth';
-import { ShareService } from "../../services/share.service"
-import { FollowService } from "../../services/follow.service"
+import { ShareService } from "../../services/share/share.service"
+import { FollowService } from "../../services/follow/follow.service"
 
 @Component({
   selector: "app-book-details",

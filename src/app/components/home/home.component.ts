@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common"
 import { Router, ActivatedRoute } from "@angular/router"
 import { SidebarComponent } from "../sidebar/sidebar.component"
 import { HeaderComponent } from "../header/header.component"
-import { BooksService, Book } from "../../services/books.service"
+import { BooksService, Book } from "../../services/books/books.service"
 import { AuthService } from "../../AuthService/auth.service"
 import { Subscription } from "rxjs"
 
