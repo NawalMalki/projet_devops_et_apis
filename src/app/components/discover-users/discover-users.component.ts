@@ -1,8 +1,8 @@
 // import { Component, OnInit } from '@angular/core';
 // import { CommonModule } from '@angular/common';
 // import { Auth } from '@angular/fire/auth';
-// import { UserService } from '../../services/user.service';
-// import { FollowService } from '../../services/follow.service';
+// import { UserService } from '../../services/user/user.service';
+// import { FollowService } from '../../services/follow/follow.service';
 // import { SidebarComponent } from "../sidebar/sidebar.component";
 // import { HeaderComponent } from "../header/header.component";
 
@@ -78,8 +78,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Auth } from '@angular/fire/auth';
-import { UserService } from '../../services/user.service';
-import { FollowService } from '../../services/follow.service';
+import { UserService } from '../../services/user/user.service';
+import { FollowService } from '../../services/follow/follow.service';
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { HeaderComponent } from "../header/header.component";
 

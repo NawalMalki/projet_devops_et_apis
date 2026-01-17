@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth, user, User, updateProfile } from '@angular/fire/auth';
+import { LibraryService } from '../../services/library/library.service';
+import { ShareService } from '../../services/share/share.service';
 
 interface UserProfile {
   name: string;
@@ -13,14 +15,8 @@ interface UserProfile {
     booksRead: number;
     currentlyReading: number;
     favorites: number;
+    shares: number;
   };
-}
-
-interface FavoriteBook {
-  id: string;
-  title: string;
-  author: string;
-  cover: string;
 }
 
 @Component({
@@ -35,7 +31,7 @@ export class UserProfileComponent implements OnInit {
   loading = true;
   saving = false;
   isEditMode = false;
-  activeTab: 'favorites' | 'settings' = 'favorites';
+  activeTab: 'settings' = 'settings';
 
   userProfile: UserProfile = {
     name: '',
@@ -47,15 +43,13 @@ export class UserProfileComponent implements OnInit {
       booksRead: 0,
       currentlyReading: 0,
       favorites: 0,
+      shares: 0,
     },
   };
 
   editForm = { name: '', bio: '' };
 
-  favoriteBooks: FavoriteBook[] = [];
-  loadingFavorites = false;
-
-  constructor(private auth: Auth, public router: Router) {}
+  constructor(private auth: Auth, public router: Router, private libraryService: LibraryService, private shareService: ShareService) {}
 
   ngOnInit() {
     user(this.auth).subscribe((u) => {
@@ -80,13 +74,14 @@ export class UserProfileComponent implements OnInit {
           booksRead: 0,
           currentlyReading: 0,
           favorites: 0,
+          shares: 0,
         },
       };
 
       this.editForm.name = this.userProfile.name;
       this.editForm.bio = this.userProfile.bio;
 
-      this.loadFavorites();
+      this.loadStats();
       this.loading = false;
     });
   }
@@ -128,31 +123,33 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
-  switchTab(tab: 'favorites' | 'settings') {
+  switchTab(tab: 'settings') {
     this.activeTab = tab;
-    if (tab === 'favorites') this.loadFavorites();
   }
 
-  loadFavorites() {
-    this.loadingFavorites = true;
+  loadStats() {
+    // Load books read
+    this.libraryService.getFinishedBooks().subscribe({
+      next: (books) => {
+        this.userProfile.stats.booksRead = books.length;
+      },
+      error: (error) => console.error('Erreur chargement livres lus:', error)
+    });
 
-    setTimeout(() => {
-      this.favoriteBooks = [
-        {
-          id: '1',
-          title: 'Le Petit Prince',
-          author: 'Antoine de Saint-Exupéry',
-          cover: 'https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg',
-        },
-      ];
+    this.libraryService.getReadingBooks().subscribe({
+      next: (books) => {
+        this.userProfile.stats.currentlyReading = books.length;
+      },
+      error: (error) => console.error('Erreur chargement livres en cours:', error)
+    });
 
-      this.userProfile.stats.favorites = this.favoriteBooks.length;
-      this.loadingFavorites = false;
-    }, 500);
-  }
-
-  onBookClick(book: FavoriteBook) {
-    this.router.navigate(['/book', book.id]);
+    // Load shares
+    this.shareService.getSharedBooksCount().subscribe({
+      next: (count) => {
+        this.userProfile.stats.shares = count;
+      },
+      error: (error) => console.error('Erreur chargement partages:', error)
+    });
   }
 
   async onDeleteAccount() {

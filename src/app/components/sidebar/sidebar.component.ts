@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common"
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from "@angular/core"
 import { Router, RouterModule, NavigationEnd } from "@angular/router"
-import { BooksService } from "../../services/books.service"
+import { BooksService } from "../../services/books/books.service"
 import { forkJoin } from "rxjs"
 import { filter } from "rxjs/operators"
 

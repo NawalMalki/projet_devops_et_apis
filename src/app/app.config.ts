@@ -13,13 +13,13 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(), 
     provideFirebaseApp(() => initializeApp({
-      projectId: "projet-devops-et-apis-7dbab",
-      appId: "1:446629304058:web:c9fe26577f1751ce1b9b43",
-      storageBucket: "projet-devops-et-apis-7dbab.firebasestorage.app",
-      apiKey: "AIzaSyCmxQWaGi9-Ntt2UW_wVxHbHgLqcW-15AE",
-      authDomain: "projet-devops-et-apis-7dbab.firebaseapp.com",
-      messagingSenderId: "446629304058",
-      measurementId: "G-XVMX0WCX1G"
+      apiKey: "AIzaSyBgKI1y53L3RdAwMJrgheFES_FXdCblD70",
+  authDomain: "projet-devops-et-apis-e5a1e.firebaseapp.com",
+  projectId: "projet-devops-et-apis-e5a1e",
+  storageBucket: "projet-devops-et-apis-e5a1e.firebasestorage.app",
+  messagingSenderId: "546958526888",
+  appId: "1:546958526888:web:69e78c326b9accedd1359d",
+  measurementId: "G-75EC11N1F8"
     })),
   
     provideAuth(() => getAuth()),

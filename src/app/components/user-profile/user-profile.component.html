@@ -86,9 +86,10 @@
 
     <!-- STATS -->
     <div class="profile-stats">
-      <div class="stat-card">📚 {{ userProfile.stats.booksRead }}</div>
-      <div class="stat-card">📖 {{ userProfile.stats.currentlyReading }}</div>
-      <div class="stat-card">⭐ {{ userProfile.stats.favorites }}</div>
+      <div class="stat-card"><i class="fas fa-book"></i> {{ userProfile.stats.booksRead }}</div>
+      <div class="stat-card"><i class="fas fa-book-open"></i> {{ userProfile.stats.currentlyReading }}</div>
+      <div class="stat-card"><i class="fas fa-star"></i> {{ userProfile.stats.favorites }}</div>
+      <div class="stat-card"><i class="fas fa-share-alt"></i> {{ userProfile.stats.shares }}</div>
     </div>
 
     <!-- CONTENT -->
@@ -98,16 +99,9 @@
       <div class="content-tabs">
         <button 
           class="tab-button"
-          [class.tab-active]="activeTab === 'favorites'"
-          (click)="switchTab('favorites')">
-          Numéro de partages
-        </button>
-
-        <button 
-          class="tab-button"
           [class.tab-active]="activeTab === 'settings'"
           (click)="switchTab('settings')">
-          ⚙️ Paramètres
+          <i class="fas fa-cog"></i> Paramètres
         </button>
       </div>
       

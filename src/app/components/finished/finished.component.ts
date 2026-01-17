@@ -3,7 +3,7 @@ import { Component, type OnInit } from "@angular/core"
 import { Router } from "@angular/router"
 import { HeaderComponent } from "../header/header.component"
 import { SidebarComponent } from "../sidebar/sidebar.component"
-import { LibraryService, UserBook } from "../../services/library.service"
+import { LibraryService, UserBook } from "../../services/library/library.service"
 
 @Component({
   selector: "app-finished",

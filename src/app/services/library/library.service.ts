@@ -12,8 +12,8 @@ import {
 } from "@angular/fire/firestore";
 import { Auth } from "@angular/fire/auth";
 import { Observable, from, map, of, switchMap } from "rxjs";
-import { Book } from "./books.service";
-import { NotificationService } from "./notification.service";
+import { Book } from "../books/books.service";
+import { NotificationService } from "../notification/notification.service";
 
 export interface UserBook extends Book {
   userId: string;
