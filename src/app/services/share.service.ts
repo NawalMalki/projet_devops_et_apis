@@ -60,4 +60,18 @@ export class ShareService {
       map(snapshot => snapshot.size)
     );
   }
+
+  // Vérifier si un livre a déjà été partagé avec un ami
+  async isBookAlreadyShared(bookId: string, fromUserId: string, toUserId: string): Promise<boolean> {
+    const sharesRef = collection(this.firestore, 'shared_books');
+    const q = query(
+      sharesRef,
+      where('bookId', '==', bookId),
+      where('fromUserId', '==', fromUserId),
+      where('toUserId', '==', toUserId)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.size > 0;
+  }
 }

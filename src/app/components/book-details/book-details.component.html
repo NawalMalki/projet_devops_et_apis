@@ -53,6 +53,30 @@
                 </div>
               </div>
 
+              <!-- Section de notation de l'utilisateur -->
+              <div class="meta-item">
+                <span class="meta-label">Votre Note</span>
+                <div class="user-rating">
+                  <div class="stars-interactive">
+                    <span 
+                      *ngFor="let i of [1,2,3,4,5]" 
+                      class="star-interactive"
+                      [class.active]="i <= userRating"
+                      [class.hover]="i <= hoveredRating"
+                      (click)="rateBook(i)"
+                      (mouseenter)="hoveredRating = i"
+                      (mouseleave)="hoveredRating = 0"
+                    >★</span>
+                  </div>
+                  <span class="rating-info" *ngIf="averageRating > 0">
+                    Note moyenne: {{ formatRating(averageRating) }} ({{ ratingCount }} votes)
+                  </span>
+                  <span class="rating-info" *ngIf="averageRating === 0">
+                    Soyez le premier à noter ce livre !
+                  </span>
+                </div>
+              </div>
+
               <div class="meta-item">
                 <span class="meta-label">Genre</span>
                 <span class="meta-value genre-badge">{{ book.genre }}</span>
@@ -138,22 +162,59 @@
   <!--share dialog -->
 <div *ngIf="showShareDialog" class="share-overlay">
   <div class="share-dialog">
-    <h3>Partager avec un ami</h3>
-
-    <div *ngIf="friends.length === 0" class="empty-state">
-      Aucun ami à afficher
+    <div class="share-dialog-header">
+      <h3>Partager ce livre avec vos amis</h3>
+      <button class="close-icon-btn" (click)="closeShareDialog()">✕</button>
     </div>
 
-    <ul class="friends-list">
-      <li *ngFor="let friend of friends">
-        <span>{{ friend.displayName }}</span>
-        <button (click)="shareWithFriend(friend.uid)">
-          Partager
-        </button>
-      </li>
-    </ul>
+    <!-- Message de succès/erreur -->
+    <div *ngIf="shareSuccessMessage" class="share-message" [class.success]="shareSuccessMessage.includes('✓')" [class.error]="shareSuccessMessage.includes('✗')">
+      {{ shareSuccessMessage }}
+    </div>
 
-    <button class="close-btn" (click)="closeShareDialog()">Fermer</button>
+    <!-- Liste des amis avec checkboxes -->
+    <div class="friends-container">
+      <div *ngIf="friends.length === 0" class="empty-state">
+        <p>Aucun ami à afficher. Commencez par suivre d'autres utilisateurs!</p>
+      </div>
+
+      <div *ngIf="friends.length > 0" class="friends-select-list">
+        <div *ngFor="let friend of friends" class="friend-checkbox-item">
+          <input 
+            type="checkbox" 
+            [id]="'friend-' + friend.uid"
+            [checked]="isFriendSelected(friend.uid)"
+            (change)="toggleFriendSelection(friend.uid)"
+            class="friend-checkbox"
+          />
+          <label [for]="'friend-' + friend.uid" class="friend-label">
+            <img [src]="friend.avatar || 'https://ui-avatars.com/api/?name=' + friend.displayName" 
+                 [alt]="friend.displayName"
+                 class="friend-avatar-small"
+            />
+            <span class="friend-name">{{ friend.displayName }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="share-dialog-actions">
+      <button 
+        class="close-btn" 
+        (click)="closeShareDialog()"
+        [disabled]="isSharing"
+      >
+        Annuler
+      </button>
+      <button 
+        class="share-btn" 
+        (click)="shareWithMultipleFriends()"
+        [disabled]="selectedFriends.size === 0 || isSharing"
+      >
+        {{ isSharing ? 'Partage en cours...' : 'Partager (' + selectedFriends.size + ')' }}
+      </button>
+    </div>
   </div>
 </div>
 

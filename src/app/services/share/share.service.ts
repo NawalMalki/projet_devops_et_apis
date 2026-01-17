@@ -60,4 +60,66 @@ export class ShareService {
       map(snapshot => snapshot.size)
     );
   }
+
+  // Vérifier si un livre a déjà été partagé avec un ami
+  async isBookAlreadyShared(bookId: string, fromUserId: string, toUserId: string): Promise<boolean> {
+    const sharesRef = collection(this.firestore, 'shared_books');
+    const q = query(
+      sharesRef,
+      where('bookId', '==', bookId),
+      where('fromUserId', '==', fromUserId),
+      where('toUserId', '==', toUserId)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.size > 0;
+  }
+
+  // Partager un livre avec plusieurs amis
+  async shareBookWithMultipleFriends(
+    bookId: string,
+    bookTitle: string,
+    bookCover: string,
+    fromUserId: string,
+    toUserIds: string[]
+  ): Promise<number> {
+    let sharedCount = 0;
+    const sharesRef = collection(this.firestore, 'shared_books');
+    const currentUser = this.auth.currentUser;
+    const sharerName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Quelqu\'un';
+
+    for (const toUserId of toUserIds) {
+      try {
+        // Ajouter le document partagé
+        await addDoc(sharesRef, {
+          bookId,
+          bookTitle,
+          bookCover,
+          fromUserId,
+          toUserId,
+          createdAt: Timestamp.now()
+        });
+
+        // Créer une notification pour chaque ami
+        try {
+          await this.notificationService.notifyBookShared(
+            bookTitle,
+            bookId,
+            bookCover,
+            sharerName,
+            fromUserId,
+            toUserId
+          ).toPromise();
+        } catch (error) {
+          console.error('Erreur lors de la création de la notification:', error);
+        }
+
+        sharedCount++;
+      } catch (error) {
+        console.error(`Erreur lors du partage avec l'ami ${toUserId}:`, error);
+      }
+    }
+
+    return sharedCount;
+  }
 }

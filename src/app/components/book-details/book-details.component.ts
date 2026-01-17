@@ -9,6 +9,7 @@ import  { LibraryService } from "../../services/library/library.service"
 import { Auth } from '@angular/fire/auth';
 import { ShareService } from "../../services/share/share.service"
 import { FollowService } from "../../services/follow/follow.service"
+import { RatingService } from "../../services/rating/rating.service"
 
 @Component({
   selector: "app-book-details",
@@ -31,6 +32,15 @@ export class BookDetailsComponent implements OnInit {
   // pour share
   showShareDialog = false;
   friends: any[] = [];
+  shareSuccessMessage: string | null = null;
+  sharedWithUser: string | null = null;
+  selectedFriends: Set<string> = new Set();
+  isSharing = false;
+  // pour rating
+  userRating: number = 0;
+  averageRating: number = 0;
+  ratingCount: number = 0;
+  hoveredRating: number = 0;
 
 
   constructor(
@@ -42,7 +52,8 @@ export class BookDetailsComponent implements OnInit {
     // ➕ AJOUT
     private auth: Auth,
     private followService: FollowService,
-    private shareService: ShareService
+    private shareService: ShareService,
+    private ratingService: RatingService
   ) {}
 
   ngOnInit() {
@@ -64,6 +75,7 @@ export class BookDetailsComponent implements OnInit {
       next: (book) => {
         this.book = book
         this.isLoading = false
+        this.loadRatings(id);
       },
       error: (error) => {
         console.error("Erreur lors du chargement du livre:", error)
@@ -71,6 +83,29 @@ export class BookDetailsComponent implements OnInit {
         this.isLoading = false
       },
     })
+  }
+
+  async loadRatings(bookId: string) {
+    try {
+      this.userRating = await this.ratingService.getUserRating(bookId) || 0;
+      this.averageRating = await this.ratingService.getAverageRating(bookId);
+      this.ratingCount = await this.ratingService.getRatingCount(bookId);
+    } catch (error) {
+      console.error('Erreur lors du chargement des notes:', error);
+    }
+  }
+
+  async rateBook(rating: number) {
+    if (!this.book) return;
+    try {
+      await this.ratingService.rateBook(this.book.id, rating);
+      this.userRating = rating;
+      // Recharger la note moyenne
+      this.averageRating = await this.ratingService.getAverageRating(this.book.id);
+      this.ratingCount = await this.ratingService.getRatingCount(this.book.id);
+    } catch (error) {
+      console.error('Erreur lors de la notation:', error);
+    }
   }
 
   toggleSidebar() {
@@ -185,25 +220,126 @@ async shareWithFriend(friendId: string) {
   const currentUserId = this.auth.currentUser?.uid;
   if (!currentUserId || !this.book) return;
 
-  await this.shareService.shareBook({
-    bookId: this.book.id,
-    bookTitle: this.book.title,
-    bookCover: this.book.cover,
-    fromUserId: currentUserId,
-    toUserId: friendId
-  });
+  try {
+    // Trouver le nom de l'ami
+    const friend = this.friends.find(f => f.uid === friendId);
+    const friendName = friend?.displayName || "cet ami";
 
-  this.closeShareDialog();
+    // Vérifier si le livre a déjà été partagé avec cet ami
+    const isAlreadyShared = await this.shareService.isBookAlreadyShared(
+      this.book.id,
+      currentUserId,
+      friendId
+    );
+
+    if (isAlreadyShared) {
+      // Afficher un message d'avertissement
+      this.shareSuccessMessage = `⚠️ Ce livre a déjà été partagé avec ${friendName}`;
+      
+      // Demander confirmation
+      const confirmed = confirm(`Ce livre a déjà été partagé avec ${friendName}. Voulez-vous le partager à nouveau ?`);
+      
+      if (!confirmed) {
+        // Masquer le message après 2 secondes si l'utilisateur refuse
+        setTimeout(() => {
+          this.shareSuccessMessage = null;
+        }, 2000);
+        return;
+      }
+    }
+
+    await this.shareService.shareBook({
+      bookId: this.book.id,
+      bookTitle: this.book.title,
+      bookCover: this.book.cover,
+      fromUserId: currentUserId,
+      toUserId: friendId
+    });
+
+    // Afficher le message de succès avec le nom de l'ami
+    this.shareSuccessMessage = `✓ Livre partagé avec ${friendName} !`;
+    this.sharedWithUser = friendId;
+    
+    // Masquer le message après 3 secondes
+    setTimeout(() => {
+      this.shareSuccessMessage = null;
+    }, 3000);
+
+    // Fermer le dialogue après 1 seconde
+    setTimeout(() => {
+      this.closeShareDialog();
+    }, 1000);
+  } catch (error) {
+    console.error('Erreur lors du partage:', error);
+    this.shareSuccessMessage = "✗ Erreur lors du partage";
+    setTimeout(() => {
+      this.shareSuccessMessage = null;
+    }, 3000);
+  }
 }
 
 
   openShareDialog() {
     this.showShareDialog = true;
+    this.selectedFriends.clear();
+    this.shareSuccessMessage = null;
     this.loadFriends();
   }
 
   closeShareDialog() {
     this.showShareDialog = false;
+    this.selectedFriends.clear();
+    this.shareSuccessMessage = null;
+  }
+
+  toggleFriendSelection(friendId: string) {
+    if (this.selectedFriends.has(friendId)) {
+      this.selectedFriends.delete(friendId);
+    } else {
+      this.selectedFriends.add(friendId);
+    }
+  }
+
+  isFriendSelected(friendId: string): boolean {
+    return this.selectedFriends.has(friendId);
+  }
+
+  async shareWithMultipleFriends() {
+    const currentUserId = this.auth.currentUser?.uid;
+    if (!currentUserId || !this.book || this.selectedFriends.size === 0) return;
+
+    this.isSharing = true;
+
+    try {
+      const sharedCount = await this.shareService.shareBookWithMultipleFriends(
+        this.book.id,
+        this.book.title,
+        this.book.cover,
+        currentUserId,
+        Array.from(this.selectedFriends)
+      );
+
+      const friendNames = Array.from(this.selectedFriends)
+        .map(friendId => this.friends.find(f => f.uid === friendId)?.displayName || "ami")
+        .join(", ");
+
+      this.shareSuccessMessage = `✓ Livre partagé avec ${sharedCount} ami(s): ${friendNames}`;
+      
+      // Réinitialiser la sélection après succès
+      setTimeout(() => {
+        this.selectedFriends.clear();
+        this.shareSuccessMessage = null;
+        this.closeShareDialog();
+      }, 2000);
+    } catch (error) {
+      console.error('Erreur lors du partage:', error);
+      this.shareSuccessMessage = "✗ Erreur lors du partage";
+      setTimeout(() => {
+        this.shareSuccessMessage = null;
+      }, 3000);
+    } finally {
+      this.isSharing = false;
+    }
   }
 
   getStars(rating: number): string[] {

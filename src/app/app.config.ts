@@ -14,12 +14,14 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(), 
     provideFirebaseApp(() => initializeApp({
+
       projectId: "projet-devops-et-apis-f9524",
       appId: "1:704851120956:web:eb2cd9d935bf18e9110439",
       storageBucket: "projet-devops-et-apis-f9524.firebasestorage.app",
       apiKey: "AIzaSyCqvdelOGIkAIToFjdU7rbeZRNdXEy72-I",
       authDomain: "projet-devops-et-apis-f9524.firebaseapp.com",
       messagingSenderId: "704851120956"
+
     })),
   
     provideAuth(() => getAuth()),
